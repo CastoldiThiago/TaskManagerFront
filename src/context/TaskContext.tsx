@@ -1,29 +1,28 @@
-import React from "react"
-// Contexto global para tareas
-import { createContext, useContext, type ReactNode } from "react"
-import { useTasks } from "../hooks/useTasks"
-import { useLists } from "../hooks/useLists"
-import type { Task, TaskList, TaskFilter } from "../types"
+import React from "react";
+import { createContext, useContext, type ReactNode } from "react";
+import { useTasks } from "../hooks/useTasks";
+import { useLists } from "../hooks/useLists";
+import type { Task, TaskList, TaskFilter } from "../types";
 
 interface TaskContextType {
-  tasks: Task[]
-  lists: TaskList[]
-  isLoading: boolean
-  error: Error | null
-  fetchTasks: (filter?: TaskFilter) => Promise<void>
-  fetchMyDayTasks: () => Promise<void>
-  fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>
-  createTask: (task: Partial<Task>) => Promise<Task>
-  updateTask: (id: string, updates: Partial<Task>) => Promise<Task>
-  deleteTask: (id: string) => Promise<void>
-  completeTask: (id: string, completed?: boolean) => Promise<Task>
-  fetchLists: () => Promise<void>
-  createList: (list: Partial<TaskList>) => Promise<TaskList>
-  updateList: (id: string, updates: Partial<TaskList>) => Promise<TaskList>
-  deleteList: (id: string) => Promise<void>
+  tasks: Task[];
+  lists: TaskList[];
+  isLoading: boolean;
+  error: Error | null;
+  fetchTasks: (filter?: TaskFilter) => Promise<void>;
+  fetchMyDayTasks: () => Promise<void>;
+  fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>;
+  createTask: (task: Partial<Task>) => Promise<Task>;
+  updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
+  deleteTask: (id: string) => Promise<void>;
+  changeStateTask: (id: string, state: "TODO" | "INPROGRESS" | "DONE") => Promise<Task>;
+  fetchLists: () => Promise<void>;
+  createList: (list: Partial<TaskList>) => Promise<TaskList>;
+  updateList: (id: string, updates: Partial<TaskList>) => Promise<TaskList>;
+  deleteList: (id: string) => Promise<void>;
 }
 
-const TaskContext = createContext<TaskContextType | undefined>(undefined)
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export function TaskProvider({ children }: { children: ReactNode }) {
   const {
@@ -36,8 +35,8 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     createTask,
     updateTask,
     deleteTask,
-    completeTask,
-  } = useTasks({ autoFetch: false })
+    changeStateTask,
+  } = useTasks({ autoFetch: false });
 
   const {
     lists,
@@ -47,10 +46,10 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     createList,
     updateList,
     deleteList,
-  } = useLists({ autoFetch: true })
+  } = useLists({ autoFetch: true });
 
-  const isLoading = tasksLoading || listsLoading
-  const error = tasksError || listsError
+  const isLoading = tasksLoading || listsLoading;
+  const error = tasksError || listsError;
 
   return (
     <TaskContext.Provider
@@ -65,7 +64,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         createTask,
         updateTask,
         deleteTask,
-        completeTask,
+        changeStateTask,
         fetchLists,
         createList,
         updateList,
@@ -74,13 +73,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     >
       {children}
     </TaskContext.Provider>
-  )
+  );
 }
 
 export function useTaskContext() {
-  const context = useContext(TaskContext)
+  const context = useContext(TaskContext);
   if (context === undefined) {
-    throw new Error("useTaskContext must be used within a TaskProvider")
+    throw new Error("useTaskContext must be used within a TaskProvider");
   }
-  return context
+  return context;
 }

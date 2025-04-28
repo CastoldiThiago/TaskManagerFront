@@ -1,19 +1,21 @@
 // Definición de tipos para la aplicación
 
+export type Status = "TODO" | "INPROGRESS" | "DONE"
+
 export interface Task {
-    id: string
-    title: string
-    description?: string
-    completed: boolean
-    dueDate?: Date
-    listId?: string
-    createdAt: Date
-    updatedAt: Date
-    isImportant?: boolean
-    isMyDay?: boolean
-    notes?: string
-    subtasks?: SubTask[]
-  }
+  id: string;
+  title: string;
+  description?: string;
+  status?: Status;
+  dueDate?: string | Date; // Permitir que sea string o Date
+  listId?: string;
+  createdAt: string | Date; // Permitir que sea string o Date
+  updatedAt: string | Date; // Permitir que sea string o Date
+  isImportant?: boolean;
+  isMyDay?: boolean;
+  notes?: string;
+  subtasks?: SubTask[];
+}
   
   export interface SubTask {
     id: string
@@ -24,8 +26,8 @@ export interface Task {
   export interface TaskList {
     id: string
     name: string
-    color?: string
-    icon?: string
+    description?: string
+    owner: User
     tasks?: Task[]
     createdAt: Date
     updatedAt: Date
@@ -42,8 +44,7 @@ export interface Task {
   
   export interface User {
     id: string
-    name: string
+    username: string
     email: string
-    avatar?: string
   }
   
