@@ -42,7 +42,7 @@ export default function TaskItem({ task, onTaskUpdated }: TaskItemProps) {
 
   const handleComplete = async () => {
     try {
-      await completeTask(task.id, !task.completed)
+      await completeTask(task.id)
       if (onTaskUpdated) onTaskUpdated()
     } catch (error) {
       console.error("Error completing task:", error)

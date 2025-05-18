@@ -12,7 +12,7 @@ export default function MyDayPage() {
     fetchMyDayTasks()
   }, [fetchMyDayTasks])
 
-  console.log()
+  console.log("Tasks:", tasks)
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto", p: 2 }}>
       <Typography variant="h4" sx={{ mb: 3 }}>

@@ -10,6 +10,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import { CssBaseline, ThemeProvider, createTheme} from '@mui/material';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const theme = createTheme({
   palette: {
@@ -30,24 +31,26 @@ const theme = createTheme({
 function App() {
   return (
     <AuthProvider>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/oauth-success" element={<OAuthSuccess />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route
-            path="/home/*"
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </ThemeProvider>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/oauth-success" element={<OAuthSuccess />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route
+              path="/home/*"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </ThemeProvider>
+      </GoogleOAuthProvider>
     </AuthProvider>
   );
 }

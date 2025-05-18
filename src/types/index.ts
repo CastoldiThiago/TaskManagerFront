@@ -11,10 +11,8 @@ export interface Task {
   listId?: string;
   createdAt: string | Date; // Permitir que sea string o Date
   updatedAt: string | Date; // Permitir que sea string o Date
-  isImportant?: boolean;
   isMyDay?: boolean;
   notes?: string;
-  subtasks?: SubTask[];
 }
   
   export interface SubTask {

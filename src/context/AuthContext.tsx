@@ -3,7 +3,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 
 interface AuthContextProps {
     isAuthenticated: boolean;
-    loginWithGoogle: () => void;
     logout: () => void;
     token: string | null; // Puede ser un token JWT o de Google
     setToken: React.Dispatch<React.SetStateAction<string | null>>;
@@ -15,16 +14,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(null);
 
     const isAuthenticated = !!token;
-
-    const loginWithGoogle = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            setToken(tokenResponse.access_token);
-            localStorage.setItem('authToken', tokenResponse.access_token); // Guardar el token de Google
-        },
-        onError: (error) => {
-            console.error('Error al iniciar sesión con Google:', error);
-        },
-    });
+    
 
     const logout = () => {
         setToken(null);
@@ -39,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, loginWithGoogle, logout, token, setToken }}>
+        <AuthContext.Provider value={{ isAuthenticated, logout, token, setToken }}>
             {children}
         </AuthContext.Provider>
     );

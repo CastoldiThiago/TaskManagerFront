@@ -18,11 +18,12 @@ import {
     Snackbar,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { GoogleLogin } from '@react-oauth/google';
 
 interface FormData {
-    username: string;
+    name: string;
+    email: string;
     password: string;
-    email?: string;
 }
 
 const Login: React.FC = () => {
@@ -32,7 +33,7 @@ const Login: React.FC = () => {
     const [open, setOpen] = React.useState(false);
     const [registerMessage, setRegisterMessage] = React.useState<string | null>(null); 
     const navigate = useNavigate();
-    const { loginWithGoogle, isAuthenticated, token, setToken } = useAuth();
+    const { isAuthenticated, token, setToken } = useAuth();
 
     const handleForgotPassword = () => {
         navigate('/forgot-password'); // Redirigir a la página de recuperación de contraseña
@@ -60,7 +61,7 @@ const Login: React.FC = () => {
             if (isLoginMode) {
                 // Login
                 const response = await axios.post(`${config.backendUrl}/auth/login`, {
-                    username: data.username,
+                    email: data.email,
                     password: data.password,
                 });
                 localStorage.setItem('authToken', response.data); // Guardar el token JWT
@@ -69,9 +70,9 @@ const Login: React.FC = () => {
             } else {
                 // Register
                 await axios.post(`${config.backendUrl}/auth/register`, {
-                    username: data.username,
-                    password: data.password,
+                    name: data.name,
                     email: data.email,
+                    password: data.password,
                 });
                 // Redirigir a la pantalla de verificación de correo
                 navigate('/verify-email', { state: { email: data.email } });
@@ -92,8 +93,6 @@ const Login: React.FC = () => {
                     if (status === 409) {
                         if (data.includes('correo')) {
                             setError('email', { type: 'manual', message: data });
-                        } else if (data.includes('usuario')) {
-                            setError('username', { type: 'manual', message: data });
                         }
                     } else if (status === 400) {
                         setErrorMessage(data); // Mostrar mensaje de solicitud inválida
@@ -106,6 +105,27 @@ const Login: React.FC = () => {
             }
         }
     };
+
+    const handleLoginSuccess = async (credentialResponse: any) => {
+        const idToken = credentialResponse.credential;
+
+        // Enviás el idToken al backend para validarlo y generar tu propio JWT
+        const res = await fetch(`${config.backendUrl}api/auth/google`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+        });
+
+        if (res.ok) {
+        const { jwt } = await res.json();
+        localStorage.setItem('authToken', jwt);
+        navigate('/home');
+        } else {
+        console.error('Error validando el token');
+        }
+  };
 
     useEffect(() => {
         if (isAuthenticated && token) {
@@ -161,16 +181,6 @@ const Login: React.FC = () => {
             {/* Formulario */}
             <form onSubmit={handleSubmit(onSubmit)} style={{ marginTop: 20 }}>
                 <TextField
-                    label="Username"
-                    variant="outlined"
-                    fullWidth
-                    margin="normal"
-                    {...register('username', { required: 'El nombre de usuario es obligatorio' })}
-                    error={!!errors.username}
-                    helperText={errors.username?.message}
-                />
-                {!isLoginMode && (
-                    <TextField
                         label="Email"
                         variant="outlined"
                         fullWidth
@@ -184,6 +194,17 @@ const Login: React.FC = () => {
                         })}
                         error={!!errors.email}
                         helperText={errors.email?.message}
+                    />
+                
+                {!isLoginMode && (
+                    <TextField
+                    label="Nombre"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    {...register('name', { required: 'El nombre es obligatorio' })}
+                    error={!!errors.name}
+                    helperText={errors.name?.message}
                     />
                 )}
                 <TextField
@@ -236,20 +257,12 @@ const Login: React.FC = () => {
             {/* Divider y botón de Google */}
             <Divider sx={{ marginY: 2 }} />
             {isLoginMode && (
-                <Button
-                    onClick={loginWithGoogle}
-                    variant="outlined"
-                    color='primary'
-                    fullWidth
-                    sx={{
-                        '&:hover': {
-                            borderColor: 'primary.main',
-                            color: 'primary.main'
-                        },
+                <GoogleLogin
+                    onSuccess={handleLoginSuccess}
+                    onError={() => {
+                        console.log('Fallo el login con Google');
                     }}
-                >
-                    Iniciar sesión con Google
-                </Button>
+                />
             )}
 
             {/* Alternar entre Login y Registro */}

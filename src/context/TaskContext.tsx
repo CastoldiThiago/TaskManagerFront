@@ -14,6 +14,7 @@ interface TaskContextType {
   fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>;
   createTask: (task: Partial<Task>) => Promise<Task>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
+  completeTask: (id: string) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
   changeStateTask: (id: string, state: "TODO" | "INPROGRESS" | "DONE") => Promise<Task>;
   fetchLists: () => Promise<void>;
@@ -34,6 +35,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     fetchCalendarTasks,
     createTask,
     updateTask,
+    completeTask,
     deleteTask,
     changeStateTask,
   } = useTasks({ autoFetch: false });
@@ -63,6 +65,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         fetchCalendarTasks,
         createTask,
         updateTask,
+        completeTask,
         deleteTask,
         changeStateTask,
         fetchLists,
