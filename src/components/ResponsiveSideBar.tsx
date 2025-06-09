@@ -26,6 +26,7 @@ import ListAltIcon from "@mui/icons-material/ListAlt"
 import LogoutIcon from "@mui/icons-material/Logout"
 import { NavLink, useLocation } from "react-router-dom"
 import { set } from "react-hook-form"
+import { useAuth } from "../context/AuthContext"
 
 const drawerWidth = 240
 
@@ -69,7 +70,8 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   const location = useLocation()
   const [open, setOpen] = React.useState(false)
   const [isClosing, setIsClosing] = React.useState(false)
-  const [userName, setUserName] = React.useState("Thiago")
+  const [userName, setUserName] = React.useState(localStorage.getItem('name') ?? "")
+  const { logout } = useAuth();
 
   React.useEffect(() => {
     const storedUserName = localStorage.getItem("userName")
@@ -98,8 +100,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   }
 
   const handleLogOut = () => {
-    localStorage.removeItem("authToken")
-    window.location.href = "/"
+    logout();
   }
 
   const menuItems = [

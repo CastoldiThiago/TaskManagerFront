@@ -33,7 +33,7 @@ const Login: React.FC = () => {
     const [open, setOpen] = React.useState(false);
     const [registerMessage, setRegisterMessage] = React.useState<string | null>(null); 
     const navigate = useNavigate();
-    const { isAuthenticated, token, setToken } = useAuth();
+    const { isAuthenticated, token, login } = useAuth();
 
     const handleForgotPassword = () => {
         navigate('/forgot-password'); // Redirigir a la página de recuperación de contraseña
@@ -64,8 +64,7 @@ const Login: React.FC = () => {
                     email: data.email,
                     password: data.password,
                 });
-                localStorage.setItem('authToken', response.data); // Guardar el token JWT
-                setToken(response.data); // Actualizar el estado del contexto
+                login(response.data); // Actualizar el estado del contexto
                 navigate('/home');
             } else {
                 // Register
@@ -110,7 +109,7 @@ const Login: React.FC = () => {
         const idToken = credentialResponse.credential;
 
         // Enviás el idToken al backend para validarlo y generar tu propio JWT
-        const res = await fetch(`${config.backendUrl}api/auth/google`, {
+        const res = await fetch(`${config.backendUrl}/api/auth/google`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -120,7 +119,7 @@ const Login: React.FC = () => {
 
         if (res.ok) {
         const { jwt } = await res.json();
-        localStorage.setItem('authToken', jwt);
+        login(jwt);
         navigate('/home');
         } else {
         console.error('Error validando el token');

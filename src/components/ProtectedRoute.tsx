@@ -6,7 +6,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     const { isAuthenticated, token } = useAuth();
 
     // Validar si el usuario está autenticado
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated) {
         return <Navigate to="/" />;
     }
 
