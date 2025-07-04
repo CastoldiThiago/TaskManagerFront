@@ -17,6 +17,15 @@ function parseJwt(token: string): any {
   }
 }
 
+function isTokenExpired(token: string | null): boolean {
+  if (!token) return true;
+  const decoded = parseJwt(token);
+  if (!decoded?.exp) return true;
+  const now = Math.floor(Date.now() / 1000);
+  return decoded.exp < now;
+}
+
+
 interface AuthContextProps {
     isAuthenticated: boolean;
     logout: () => void;
@@ -34,6 +43,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isAuthenticated = !!token;
     
     const login = (jwt:string) => {
+        if (isTokenExpired(jwt)) {
+            logout();
+            return;
+        }
         setToken(jwt);
         const decoded = parseJwt(jwt);
         localStorage.setItem('authToken', jwt);
@@ -52,12 +65,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const storedToken = localStorage.getItem('authToken');
-        if (storedToken) {
+        if (storedToken && !isTokenExpired(storedToken)) {
             setToken(storedToken);
-        }
-        const storedName = localStorage.getItem('name');
-        if (storedName) {
-            setName(storedName);
+            const decoded = parseJwt(storedToken);
+            if (decoded?.name) {
+                setName(decoded.name);
+            }
+        } else {
+            logout();
         }
     }, []);
 

@@ -25,30 +25,24 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import ListAltIcon from "@mui/icons-material/ListAlt"
 import LogoutIcon from "@mui/icons-material/Logout"
 import { NavLink, useLocation } from "react-router-dom"
-import { set } from "react-hook-form"
 import { useAuth } from "../context/AuthContext"
+import { useTitle } from "../context/TitleContext"
 
 const drawerWidth = 240
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
   open?: boolean
-}>(({ theme, open }) => ({
+}>(({ theme }) => ({
   flexGrow: 1,
-  padding: theme.spacing(3),
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  marginLeft: `-${drawerWidth}px`,
-  ...(open && {
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-  }),
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: 0,
+  display: "flex",
+  flexDirection: "column",
+  height: "100vh",
+  minHeight: 0,
+  overflow: "hidden",
+  background: theme.palette.background.default,
+  // Solo padding arriba para el AppBar
+  [theme.breakpoints.down("sm")]: {
+    paddingTop: theme.spacing(8),
   },
 }))
 
@@ -56,7 +50,6 @@ const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
   padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
   ...theme.mixins.toolbar,
   justifyContent: "flex-end",
 }))
@@ -70,20 +63,18 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   const location = useLocation()
   const [open, setOpen] = React.useState(false)
   const [isClosing, setIsClosing] = React.useState(false)
-  const [userName, setUserName] = React.useState(localStorage.getItem('name') ?? "")
-  const { logout } = useAuth();
+  const { logout } = useAuth()
+  const { title, setTitle } = useTitle()
 
   React.useEffect(() => {
-    const storedUserName = localStorage.getItem("userName")
+    const storedUserName = localStorage.getItem("name")
     if (storedUserName) {
-      setUserName(storedUserName)
+      setTitle(`Bienvenido! ${storedUserName}`)
     }
   }, [])
 
   const handleDrawerOpen = () => {
-    if (!isClosing) {
-      setOpen(true)
-    }
+    if (!isClosing) setOpen(true)
     if (open) {
       setIsClosing(true)
       setOpen(false)
@@ -100,7 +91,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   }
 
   const handleLogOut = () => {
-    logout();
+    logout()
   }
 
   const menuItems = [
@@ -110,12 +101,14 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
     { text: "Calendario", path: "/home/calendar", icon: <CalendarMonthIcon /> },
   ]
 
-  const secondaryItems = [{ text: "Lista de tareas", path: "/home/task-list", icon: <ListAltIcon /> }]
+  const secondaryItems = [
+    { text: "Lista de tareas", path: "/home/task-list", icon: <ListAltIcon /> },
+  ]
 
   const isActive = (path: string) => location.pathname === path
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", height: "100vh", width: "100vw", overflow: "hidden" }}>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -123,6 +116,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
           zIndex: (theme) => theme.zIndex.drawer + 1,
+          boxShadow: 2,
         }}
       >
         <Toolbar>
@@ -135,8 +129,8 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Bienvenido! {userName}
+          <Typography variant="h5" noWrap component="div" sx={{ flexGrow: 1, textAlign: "start" }}>
+            {title}
           </Typography>
           <IconButton color="inherit" onClick={handleLogOut} edge="end">
             <LogoutIcon />
@@ -146,15 +140,24 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           </IconButton>
         </Toolbar>
       </AppBar>
-      <Box component="nav" sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }} aria-label="mailbox folders">
-        {/* Mobile drawer */}
+      {/* Drawer lateral */}
+      <Box
+        component="nav"
+        sx={{
+          width: { sm: drawerWidth },
+          flexShrink: { sm: 0 },
+          height: "100vh",
+        }}
+        aria-label="mailbox folders"
+      >
+        {/* Drawer mobile */}
         <Drawer
           variant="temporary"
           open={open}
           onTransitionEnd={handleDrawerTransitionEnd}
           onClose={handleDrawerClose}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },
@@ -179,24 +182,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                   to={item.path}
                   selected={isActive(item.path)}
                   sx={{
-                    "&.active": {
+                    "&.active, &:hover, &[aria-selected='true']": {
                       backgroundColor: "rgba(0, 0, 0, 0.08)",
                       borderRadius: "8px",
                       mx: 1,
                       width: "calc(100% - 16px)",
                     },
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    ...(isActive(item.path) && {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    }),
                     my: 0.5,
                   }}
                 >
@@ -215,24 +206,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                   to={item.path}
                   selected={isActive(item.path)}
                   sx={{
-                    "&.active": {
+                    "&.active, &:hover, &[aria-selected='true']": {
                       backgroundColor: "rgba(0, 0, 0, 0.08)",
                       borderRadius: "8px",
                       mx: 1,
                       width: "calc(100% - 16px)",
                     },
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    ...(isActive(item.path) && {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    }),
                     my: 0.5,
                   }}
                 >
@@ -243,7 +222,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             ))}
           </List>
         </Drawer>
-        {/* Desktop drawer */}
+        {/* Drawer desktop */}
         <Drawer
           variant="permanent"
           sx={{
@@ -252,6 +231,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
               boxSizing: "border-box",
               width: drawerWidth,
               boxShadow: 3,
+              height: "100vh",
             },
           }}
           open
@@ -269,24 +249,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                   to={item.path}
                   selected={isActive(item.path)}
                   sx={{
-                    "&.active": {
+                    "&.active, &:hover, &[aria-selected='true']": {
                       backgroundColor: "rgba(0, 0, 0, 0.08)",
                       borderRadius: "8px",
                       mx: 1,
                       width: "calc(100% - 16px)",
                     },
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    ...(isActive(item.path) && {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    }),
                     my: 0.5,
                   }}
                 >
@@ -305,24 +273,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                   to={item.path}
                   selected={isActive(item.path)}
                   sx={{
-                    "&.active": {
+                    "&.active, &:hover, &[aria-selected='true']": {
                       backgroundColor: "rgba(0, 0, 0, 0.08)",
                       borderRadius: "8px",
                       mx: 1,
                       width: "calc(100% - 16px)",
                     },
-                    "&:hover": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    ...(isActive(item.path) && {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    }),
                     my: 0.5,
                   }}
                 >
@@ -334,7 +290,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           </List>
         </Drawer>
       </Box>
-      <Main open={open}>
+      <Main>
         <DrawerHeader />
         {children}
       </Main>

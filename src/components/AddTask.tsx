@@ -14,25 +14,29 @@ import {
   Divider,
   Typography,
 } from "@mui/material"
-import { Add, KeyboardArrowUp, FormatListBulleted, CalendarMonth, Close } from "@mui/icons-material"
+import { Add, KeyboardArrowUp, FormatListBulleted, CalendarMonth, Close} from "@mui/icons-material"
+import SendIcon from "@mui/icons-material/Send"
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar"
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
-import { format } from "date-fns"
+import { format, set } from "date-fns"
+import { useLists } from "../hooks/useLists"
+import { TaskList, Task, CreateTask } from "../types"
+import { useTasks } from "../hooks/useTasks"
+import { taskService } from "../services/api/tasks"
+import { useTaskContext } from "../context/TaskContext"
 
-// Mock data for task lists
-const taskLists = [
-  { id: 1, name: "Personal" },
-  { id: 2, name: "Trabajo" },
-  { id: 3, name: "Compras" },
-  { id: 4, name: "Proyectos" },
-]
+interface AddTaskProps {
+  isInMyDay?: boolean
+}
 
-export default function AddTask() {
+export default function AddTask({ isInMyDay }: AddTaskProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [taskName, setTaskName] = useState("")
-  const [selectedList, setSelectedList] = useState<{ id: number; name: string } | null>(null)
+  const [selectedList, setSelectedList] = useState<TaskList | null>(null)
   const [dueDate, setDueDate] = useState<Date | null>(null)
+  const {lists} = useLists()
+  const {createTask} = useTaskContext()
 
   // Popover states
   const [listAnchorEl, setListAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -86,13 +90,28 @@ export default function AddTask() {
 
   const handleSubmit = () => {
     if (taskName.trim()) {
-      console.log({
-        name: taskName,
-        listId: selectedList?.id,
-        dueDate: dueDate,
-      })
+      const newTask: CreateTask = {
+        title: taskName.trim(),
+        description: null,
+        dueDate: dueDate ? dueDate.toISOString() : null,
+        movedDate: isInMyDay ? new Date().toISOString() : null,
+        status: "TODO",
+        listId: selectedList ? selectedList.id : null,
+        movedToMyDay: isInMyDay ? true : false,
+      };
+
+      createTask(newTask)
+        .then((task) => {
+          console.log("Task created successfully:", task)
+          resetForm()
+        })
+        .catch((error) => {
+          console.error("Error creating task:", error)
+        })
 
       setTaskName("")
+      setSelectedList(null)
+      setDueDate(null)
       setIsExpanded(false)
     }
   }
@@ -115,7 +134,7 @@ export default function AddTask() {
     setListAnchorEl(null)
   }
 
-  const handleListSelect = (list: { id: number; name: string }) => {
+  const handleListSelect = (list: TaskList) => {
     setSelectedList(list)
     handleListClose()
   }
@@ -146,15 +165,15 @@ export default function AddTask() {
   }
 
   return (
-    <Box sx={{ maxWidth: 500, margin: "0 auto" }} ref={containerRef}>
+    <Box sx={{ maxWidth: "100%", margin: "0 auto" }} ref={containerRef}>
       <Paper
         elevation={0}
         sx={{
           p: 0.5,
           borderRadius: 2,
-          backgroundColor: "secondary.main",
-          border: "1px solid #333",
+          backgroundColor: "primary.main",
           color: "#fff",
+          width: "100%",
         }}
       >
         {!isExpanded ? (
@@ -167,8 +186,8 @@ export default function AddTask() {
               cursor: "pointer",
             }}
           >
-            <Add sx={{ color: "#888", mr: 1 }} />
-            <Box sx={{ color: "#888" }}>Add task</Box>
+            <Add sx={{ color: "#fff", mr: 1 }} />
+            <Box sx={{ color: "#fff" }}>Add task</Box>
           </Box>
         ) : (
           <Box>
@@ -177,7 +196,7 @@ export default function AddTask() {
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
-                borderBottom: "1px solid #333",
+                borderBottom: "1px solid #fff",
                 px: 2,
                 py: 1,
               }}
@@ -190,7 +209,7 @@ export default function AddTask() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: selectedList ? "#773344" : "#888",
+                  color: selectedList ? "#fff" : "#fff",
                   cursor: "pointer",
                   flex: 1,
                   position: "relative",
@@ -198,7 +217,7 @@ export default function AddTask() {
               >
                 {selectedList ? (
                   <>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "#fff", "&:hover": { color: "#888" } }}>
                       {selectedList.name}
                     </Typography>
                     <IconButton
@@ -207,8 +226,8 @@ export default function AddTask() {
                       sx={{
                         ml: 0.5,
                         p: 0.25,
-                        color: "#888",
-                        "&:hover": { color: "#fff" },
+                        color: "#fff",
+                        "&:hover": { color: "#888" },
                       }}
                     >
                       <Close fontSize="small" />
@@ -219,7 +238,7 @@ export default function AddTask() {
                 )}
               </div>
 
-              <Divider orientation="vertical" flexItem sx={{ bgcolor: "#333" }} />
+              <Divider orientation="vertical" flexItem sx={{ bgcolor: "#fff" }} />
 
               {/* Botón de fecha */}
               <div
@@ -229,7 +248,7 @@ export default function AddTask() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: dueDate ? "#773344" : "#888",
+                  color: dueDate ? "#fff" : "#fff",
                   cursor: "pointer",
                   flex: 1,
                   position: "relative",
@@ -237,7 +256,7 @@ export default function AddTask() {
               >
                 {dueDate ? (
                   <>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: "#fff", "&:hover": { color: "#888" } }}>
                       {format(dueDate, "MMM d")}
                     </Typography>
                     <IconButton
@@ -246,8 +265,8 @@ export default function AddTask() {
                       sx={{
                         ml: 0.5,
                         p: 0.25,
-                        color: "#888",
-                        "&:hover": { color: "#fff" },
+                        color: "#fff",
+                        "&:hover": { color: "#888" },
                       }}
                     >
                       <Close fontSize="small" />
@@ -260,6 +279,7 @@ export default function AddTask() {
             </Box>
 
             {/* Campo de texto para el nombre de la tarea */}
+            <Box sx={{ display: "flex", alignItems: "center"}}>
             <TextField
               fullWidth
               placeholder="Add task"
@@ -294,18 +314,17 @@ export default function AddTask() {
                   borderBottomColor: "transparent",
                 },
               }}
-              // Añadimos el botón de enviar como un componente separado
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton edge="end" onClick={handleSubmit} sx={{ color: "#888" }}>
-                      <KeyboardArrowUp />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                disableUnderline: true,
-              }}
+              
             />
+            <IconButton
+              color="inherit"
+              sx={{ ml: 1 }}
+              onClick={handleSubmit}
+              disabled={!taskName.trim()}
+            >
+              <SendIcon />
+            </IconButton>
+            </Box>
           </Box>
         )}
       </Paper>
@@ -326,7 +345,7 @@ export default function AddTask() {
         slotProps={{
           paper: {
             sx: {
-              backgroundColor: "#1E1E1E",
+              backgroundColor: "primary.main",
               color: "#fff",
               width: 200,
               mt: 1,
@@ -336,17 +355,17 @@ export default function AddTask() {
         onClick={(e) => e.stopPropagation()}
       >
         <List dense>
-          {taskLists.map((list) => (
+          {lists.map((list) => (
             <ListItemButton
               key={list.id}
               onClick={() => handleListSelect(list)}
               selected={selectedList?.id === list.id}
               sx={{
                 "&.Mui-selected": {
-                  backgroundColor: "#333",
+                  backgroundColor: "primary.main",
                 },
                 "&:hover": {
-                  backgroundColor: "#2A2A2A",
+                  backgroundColor: "primary.dark",
                 },
               }}
             >
@@ -372,7 +391,7 @@ export default function AddTask() {
         slotProps={{
           paper: {
             sx: {
-              backgroundColor: "#1E1E1E",
+              backgroundColor: "primary.main",
               color: "#fff",
               mt: 1,
             },

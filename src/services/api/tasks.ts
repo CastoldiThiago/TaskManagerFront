@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import type { Status, Task, TaskFilter } from "../../types";
+import type { CreateTask, Status, Task, TaskFilter } from "../../types";
 
 export const taskService = {
   // Obtener todas las tareas con filtros opcionales
@@ -29,7 +29,7 @@ export const taskService = {
   },
 
   // Crear una nueva tarea
-  async createTask(task: Partial<Task>): Promise<Task> {
+  async createTask(task: CreateTask): Promise<Task> {
     const response = await apiClient.post<Task>("/tasks", task);
     return response.data; // Devuelve directamente la tarea creada
   },
@@ -47,7 +47,9 @@ export const taskService = {
 
   // Cambiar el estado de una tarea
   async changeStateTask(id: string, state: Status): Promise<Task> {
-    const response = await apiClient.patch<Task>(`/tasks/${id}/state`, { state });
+    const requestBody = { state: state };
+    console.log("Request body for changing state:", requestBody);
+    const response = await apiClient.patch<Task>(`/tasks/${id}/state`, requestBody);
     return response.data; // Devuelve directamente la tarea actualizada
   },
 

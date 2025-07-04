@@ -1,208 +1,110 @@
-
 import React from "react"
-
-import { useState } from "react"
 import { useTaskContext } from "../context/TaskContext"
 import type { Task } from "../types"
-import {
-  Box,
-  Checkbox,
-  Typography,
-  IconButton,
-  Paper,
-  TextField,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material"
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  MoreVert as MoreVertIcon,
-  CalendarToday as CalendarIcon,
-  FormatListBulleted as ListIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-} from "@mui/icons-material"
+import { Box, Checkbox, Typography } from "@mui/material"
+import CalendarIcon from "@mui/icons-material/CalendarToday"
+import ListIcon from "@mui/icons-material/FormatListBulleted"
 import { format } from "date-fns"
 import { es } from "date-fns/locale"
 
 interface TaskItemProps {
   task: Task
-  onTaskUpdated?: () => void
 }
 
-export default function TaskItem({ task, onTaskUpdated }: TaskItemProps) {
-  const { updateTask, deleteTask, completeTask } = useTaskContext()
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedTitle, setEditedTitle] = useState(task.title)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
-  const menuOpen = Boolean(anchorEl)
+export default function TaskItem({ task }: TaskItemProps) {
+  const { changeStateTask } = useTaskContext()
+  const { lists } = useTaskContext()
 
-  const handleComplete = async () => {
-    try {
-      await completeTask(task.id)
-      if (onTaskUpdated) onTaskUpdated()
-    } catch (error) {
-      console.error("Error completing task:", error)
-    }
+  const handleComplete = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.stopPropagation()
+    await changeStateTask(task.id, task.status === "DONE" ? "TODO" : "DONE")
   }
 
-  const handleEdit = () => {
-    setIsEditing(true)
-    handleMenuClose()
-  }
-
-  const handleSaveEdit = async () => {
-    if (editedTitle.trim() !== "") {
-      try {
-        await updateTask(task.id, { title: editedTitle })
-        setIsEditing(false)
-        if (onTaskUpdated) onTaskUpdated()
-      } catch (error) {
-        console.error("Error updating task:", error)
-      }
-    }
-  }
-
-  const handleDelete = async () => {
-    try {
-      await deleteTask(task.id)
-      if (onTaskUpdated) onTaskUpdated()
-    } catch (error) {
-      console.error("Error deleting task:", error)
-    }
-    handleMenuClose()
-  }
-
-  const handleToggleImportant = async () => {
-    try {
-      await updateTask(task.id, { isImportant: !task.isImportant })
-      if (onTaskUpdated) onTaskUpdated()
-    } catch (error) {
-      console.error("Error updating task importance:", error)
-    }
-    handleMenuClose()
-  }
-
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
+  const handleClick = () => {
+    console.log("Abrir modal para editar tarea:", task)
   }
 
   return (
-    <Paper
-      elevation={1}
+    <Box
+      onClick={handleClick}
       sx={{
         mb: 2,
         p: 2,
         display: "flex",
         alignItems: "center",
-        opacity: task.completed ? 0.7 : 1,
-        transition: "all 0.2s",
+        borderRadius: 2,
+        backgroundColor: "secondary.main",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        opacity: task.status === "DONE" ? 0.75 : 1,
+        cursor: "pointer",
+        transition: "background 0.2s, box-shadow 0.2s",
+        "&:hover": {
+          backgroundColor: "secondary.light",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.13)",
+        },
       }}
     >
       <Checkbox
-        checked={task.completed}
+        checked={task.status === "DONE"}
+        onClick={e => e.stopPropagation()}
         onChange={handleComplete}
         sx={{
-          color: "#4F46E5",
+          color: "#7a3742",
           "&.Mui-checked": {
-            color: "#4F46E5",
+            color: "#7a3742",
           },
         }}
       />
 
-      <Box sx={{ flex: 1, ml: 1 }}>
-        {isEditing ? (
-          <TextField
-            fullWidth
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
-            onBlur={handleSaveEdit}
-            onKeyPress={(e) => e.key === "Enter" && handleSaveEdit()}
-            autoFocus
-            variant="standard"
-            size="small"
-          />
-        ) : (
-          <>
-            <Typography
-              variant="body1"
-              sx={{
-                textDecoration: task.completed ? "line-through" : "none",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              {task.isImportant && <StarIcon fontSize="small" sx={{ color: "#FFB400" }} />}
-              {task.title}
-            </Typography>
+      <Box sx={{ flex: 1, ml: 1, minWidth: 0 }}>
+        <Typography
+          variant="body1"
+          sx={{
+            textDecoration: task.status === "DONE" ? "line-through" : "none",
+            color: "#fff",
+            fontWeight: 500,
+            fontSize: 18,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {task.title}
+        </Typography>
 
-            {(task.dueDate || task.listId) && (
-              <Box sx={{ display: "flex", gap: 2, mt: 0.5 }}>
-                {task.dueDate && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      color: "text.secondary",
-                    }}
-                  >
-                    <CalendarIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
-                    {format(new Date(task.dueDate), "PPP", { locale: es })}
-                  </Typography>
-                )}
-
-                {task.listId && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      color: "text.secondary",
-                    }}
-                  >
-                    <ListIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
-                    {task.listId}
-                  </Typography>
-                )}
-              </Box>
+        {(task.dueDate || task.listId) && (
+          <Box sx={{ display: "flex", gap: 2, mt: 0.5 }}>
+            {task.listId && (
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#bdbdbd",
+                  fontSize: 13,
+                }}
+              >
+                <ListIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
+                {lists.find(list => list.id === task.listId)?.name}
+              </Typography>
             )}
-          </>
+            {task.dueDate && (
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#bdbdbd",
+                  fontSize: 13,
+                }}
+              >
+                <CalendarIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
+                {format(new Date(task.dueDate), "PPP", { locale: es })}
+              </Typography>
+            )}
+          </Box>
         )}
       </Box>
-
-      <IconButton onClick={handleMenuClick} size="small">
-        <MoreVertIcon fontSize="small" />
-      </IconButton>
-
-      <Menu anchorEl={anchorEl} open={menuOpen} onClose={handleMenuClose}>
-        <MenuItem onClick={handleEdit}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Editar</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleToggleImportant}>
-          <ListItemIcon>
-            {task.isImportant ? <StarIcon fontSize="small" /> : <StarBorderIcon fontSize="small" />}
-          </ListItemIcon>
-          <ListItemText>{task.isImportant ? "Quitar importancia" : "Marcar como importante"}</ListItemText>
-        </MenuItem>
-        <MenuItem onClick={handleDelete}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>Eliminar</ListItemText>
-        </MenuItem>
-      </Menu>
-    </Paper>
+    </Box>
   )
 }

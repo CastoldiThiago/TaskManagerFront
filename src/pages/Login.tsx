@@ -135,6 +135,16 @@ const Login: React.FC = () => {
     return (
         <Box
             sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100vh',
+                width: '100vw',
+            }}
+        >
+        <Box
+            sx={{
                 maxWidth: 400,
                 padding: 4,
                 border: '1px solid #ccc',
@@ -142,7 +152,7 @@ const Login: React.FC = () => {
                 boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)',
                 textAlign: 'center',
                 backgroundColor: '#f9f9f9',
-                color: '#000'
+                color: '#000',
             }}
         >
             <Snackbar
@@ -275,6 +285,7 @@ const Login: React.FC = () => {
                     {isLoginMode ? 'Regístrate' : 'Inicia sesión'}
                 </Link>
             </Typography>
+        </Box>
         </Box>
     );
 };

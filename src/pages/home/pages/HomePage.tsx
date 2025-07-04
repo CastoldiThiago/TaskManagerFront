@@ -1,12 +1,14 @@
 import React from "react"
 import { Box, Typography, Container, Stack, Card, CardContent, CardHeader, Button } from "@mui/material"
+import { useTitle } from "../../../context/TitleContext"
 
 export default function HomePage() {
+  const {setTitle} = useTitle()
+  React.useEffect(() => {
+    setTitle("Dashboard")
+  }, [setTitle])
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Dashboard
-      </Typography>
 
       <Container maxWidth="xl" disableGutters>
         <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ width: "100%" }}>

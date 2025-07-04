@@ -2,7 +2,7 @@ import React from "react";
 import { createContext, useContext, type ReactNode } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useLists } from "../hooks/useLists";
-import type { Task, TaskList, TaskFilter } from "../types";
+import type { Task, TaskList, TaskFilter, CreateTask, Status } from "../types";
 
 interface TaskContextType {
   tasks: Task[];
@@ -12,11 +12,10 @@ interface TaskContextType {
   fetchTasks: (filter?: TaskFilter) => Promise<void>;
   fetchMyDayTasks: () => Promise<void>;
   fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>;
-  createTask: (task: Partial<Task>) => Promise<Task>;
+  createTask: (task: CreateTask) => Promise<Task>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
-  completeTask: (id: string) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
-  changeStateTask: (id: string, state: "TODO" | "INPROGRESS" | "DONE") => Promise<Task>;
+  changeStateTask: (id: string, state: Status) => Promise<Task>;
   fetchLists: () => Promise<void>;
   createList: (list: Partial<TaskList>) => Promise<TaskList>;
   updateList: (id: string, updates: Partial<TaskList>) => Promise<TaskList>;
@@ -35,7 +34,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     fetchCalendarTasks,
     createTask,
     updateTask,
-    completeTask,
     deleteTask,
     changeStateTask,
   } = useTasks({ autoFetch: false });
@@ -65,7 +63,6 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         fetchCalendarTasks,
         createTask,
         updateTask,
-        completeTask,
         deleteTask,
         changeStateTask,
         fetchLists,

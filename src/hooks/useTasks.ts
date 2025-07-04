@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { taskService } from "../services/api/tasks";
-import type { Task, TaskFilter } from "../types";
+import type { CreateTask, Status, Task, TaskFilter } from "../types";
 
 interface UseTasksOptions {
   initialFilter?: TaskFilter;
@@ -59,7 +59,7 @@ export function useTasks(options: UseTasksOptions = {}) {
     }
   }, []);
 
-  const createTask = useCallback(async (task: Partial<Task>) => {
+  const createTask = useCallback(async (task: CreateTask) => {
     try {
       setLoading(true);
       setError(null);
@@ -93,24 +93,6 @@ export function useTasks(options: UseTasksOptions = {}) {
     }
   }, []);
 
-  const completeTask = useCallback(async (id: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const completedTask = await taskService.changeStateTask(id, "DONE");
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === id ? completedTask : task))
-      );
-      return completedTask;
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Error al actualizar la tarea"));
-      console.error("Error updating task:", err);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const deleteTask = useCallback(async (id: string) => {
     try {
       setLoading(true);
@@ -126,14 +108,16 @@ export function useTasks(options: UseTasksOptions = {}) {
     }
   }, []);
 
-  const changeStateTask = useCallback(async (id: string, state: "TODO" | "INPROGRESS" | "DONE") => {
+  const changeStateTask = useCallback(async (id: string, state: Status) => {
     try {
       setLoading(true);
       setError(null);
+      console.log("Changing task state:", id, state);
       const updatedTask = await taskService.changeStateTask(id, state);
       setTasks((prevTasks) =>
         prevTasks.map((task) => (task.id === id ? updatedTask : task))
       );
+      console.log("Task state changed successfully:", updatedTask);
       return updatedTask;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Error al cambiar el estado de la tarea"));
@@ -161,7 +145,6 @@ export function useTasks(options: UseTasksOptions = {}) {
     fetchCalendarTasks,
     createTask,
     updateTask,
-    completeTask,
     deleteTask,
     changeStateTask,
   };
