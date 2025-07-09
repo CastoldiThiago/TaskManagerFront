@@ -29,6 +29,12 @@ export interface TaskList {
   id: string
   name: string
   description?: string
+}
+
+export interface TaskListComplete {
+  id: string
+  name: string
+  description?: string
   tasks?: Task[]
   createdAt: Date
   updatedAt: Date

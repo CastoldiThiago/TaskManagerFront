@@ -9,18 +9,23 @@ import {
   Stack,
   Divider,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "@mui/material"
 import DropdownTasks from "../../../components/DropdownTasks"
 import EditTask from "../../../components/EditTask"
 import { useTaskContext } from "../../../context/TaskContext"
 import type { Task } from "../../../types"
 import AddTask from "../../../components/AddTask"
+import { useTitle } from "../../../context/TitleContext"
+import { se } from "date-fns/locale"
 
-const statusOptions = [
+const filterOptions = [
   { value: "", label: "All" },
   { value: "TODO", label: "To do" },
   { value: "IN_PROGRESS", label: "In progress" },
-  { value: "DONE", label: "Completed" },
+  { value: "DONE", label: "Done" },
+  { value: "OVERDUE", label: "Overdue" },
 ]
 
 const orderOptions = [
@@ -30,20 +35,34 @@ const orderOptions = [
 
 export default function AllMyTasks() {
   const { tasks, lists, fetchTasks } = useTaskContext()
-  const [status, setStatus] = useState<string>("")
-  const [order, setOrder] = useState<string>("createdAt")
+  const [filter, setFilter] = useState<string>("")
+  const [order, setOrder] = useState<string>("dueDate")
   const [search, setSearch] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editOpen, setEditOpen] = useState(false)
+  const [viewMode, setViewMode] = useState<"grouped" | "flat">("flat")
+  const {setTitle} = useTitle();
 
   useEffect(() => {
     fetchTasks()
+    setTitle("All my tasks")
   }, [fetchTasks])
 
   // Filtering and ordering
   const filteredTasks = useMemo(() => {
     let filtered = tasks
-    if (status) filtered = filtered.filter(t => t.status === status)
+    if (filter === "OVERDUE") {
+      const now = new Date()
+      now.setHours(0, 0, 0, 0) // Set to start of day
+      filtered = filtered.filter(
+        t =>
+          t.status !== "DONE" &&
+          t.dueDate &&
+          new Date(t.dueDate) < now
+      )
+    } else if (filter) {
+      filtered = filtered.filter(t => t.status === filter)
+    }
     if (search) filtered = filtered.filter(t =>
       t.title.toLowerCase().includes(search.toLowerCase())
     )
@@ -57,7 +76,7 @@ export default function AllMyTasks() {
       // createdAt
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
-  }, [tasks, status, order, search])
+  }, [tasks, filter, order, search])
 
   // Group by list
   const groupedByList = useMemo(() => {
@@ -81,23 +100,19 @@ export default function AllMyTasks() {
 
   return (
     <Box sx={{ p: 3, maxHeight: "100vh", overflowY: "auto" }}>
-
-      <Typography variant="h4" fontWeight={700} mb={2}>
-        All my tasks
-      </Typography>
       <Box sx={{ maxWidth: 400 }}>
         <AddTask />
       </Box>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2} mt={2}>
         <FormControl size="small" sx={{ minWidth: 140 }}>
-          <InputLabel>Status</InputLabel>
+          <InputLabel>Filter</InputLabel>
           <Select
-            value={status}
-            label="Status"
-            onChange={e => setStatus(e.target.value)}
+            value={filter}
+            label="Filter"
+            onChange={e => setFilter(e.target.value)}
           >
-            {statusOptions.map(opt => (
+            {filterOptions.map(opt => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -124,21 +139,38 @@ export default function AllMyTasks() {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={(_, value) => value && setViewMode(value)}
+          size="small"
+          sx={{ ml: 2,  }}
+        >
+          <ToggleButton value="grouped">Group by list</ToggleButton>
+          <ToggleButton value="flat">Flat list</ToggleButton>
+        </ToggleButtonGroup>
       </Stack>
       <Divider sx={{ mb: 2 }} />
 
-      {/* Grouped by list using DropdownTasks */}
-      {Object.entries(groupedByList).map(([listName, tasks]) => (
+      {/* Show grouped or flat */}
+      {viewMode === "grouped" ? (
+        Object.entries(groupedByList).map(([listName, tasks]) => (
+          <DropdownTasks
+            key={listName}
+            tasks={tasks}
+            title={listName}
+            onOpenModal={handleOpenEdit}
+          />
+        ))
+      ) : (
         <DropdownTasks
-          key={listName}
-          tasks={tasks}
-          title={listName}
+          tasks={filteredTasks}
+          title="All tasks"
           onOpenModal={handleOpenEdit}
         />
-      ))}
+      )}
 
       <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} />
-      
     </Box>
   )
 }

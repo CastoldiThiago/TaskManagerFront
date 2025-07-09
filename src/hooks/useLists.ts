@@ -41,6 +41,21 @@ export function useLists(options: UseListsOptions = {}) {
     }
   }, []);
 
+  const getList = useCallback(async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await listService.getList(id);
+      return response;
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Error al obtener la lista"));
+      console.error("Error fetching list:", err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const updateList = useCallback(async (id: string, updates: Partial<TaskList>) => {
     try {
       setLoading(true);
@@ -86,5 +101,6 @@ export function useLists(options: UseListsOptions = {}) {
     createList,
     updateList,
     deleteList,
+    getList,
   };
 }

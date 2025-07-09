@@ -24,9 +24,11 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox"
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import ListAltIcon from "@mui/icons-material/ListAlt"
 import LogoutIcon from "@mui/icons-material/Logout"
-import { NavLink, useLocation } from "react-router-dom"
+import AddIcon from "@mui/icons-material/Add"
+import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useTitle } from "../context/TitleContext"
+import { useTaskContext } from "../context/TaskContext"
 
 const drawerWidth = 240
 
@@ -65,7 +67,19 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   const [isClosing, setIsClosing] = React.useState(false)
   const { logout } = useAuth()
   const { title, setTitle } = useTitle()
+  const {lists, createList} = useTaskContext()
+  const navigate = useNavigate()
 
+  const handleAddList = async () => {
+    try {
+      const newList = await createList({ name: "New List" })
+      // Redirige a la página de la nueva lista
+      navigate(`/home/task-list/${newList.id}`)
+    } catch (e) {
+      alert("No se pudo crear la lista.")
+    }
+  }
+  
   React.useEffect(() => {
     const storedUserName = localStorage.getItem("name")
     if (storedUserName) {
@@ -99,10 +113,6 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
     { text: "All My Tasks", path: "/home/all-my-tasks", icon: <AssignmentIcon /> },
     { text: "To Do", path: "/home/todo", icon: <CheckBoxIcon /> },
     { text: "Calendario", path: "/home/calendar", icon: <CalendarMonthIcon /> },
-  ]
-
-  const secondaryItems = [
-    { text: "Lista de tareas", path: "/home/task-list", icon: <ListAltIcon /> },
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -198,29 +208,71 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             ))}
           </List>
           <Divider />
-          <List>
-            {secondaryItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  component={NavLink}
-                  to={item.path}
-                  selected={isActive(item.path)}
-                  sx={{
-                    "&.active, &:hover, &[aria-selected='true']": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    my: 0.5,
-                  }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          <Typography variant="subtitle2" sx={{ px: 2, pt: 1, color: "text.secondary" }}>
+            My Lists
+          </Typography>
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              pb: 7, // espacio para el botón
+              position: "relative",
+              minHeight: 0,
+              maxHeight: "calc(100vh - 260px)", // ajusta según tu diseño
+            }}
+          >
+            <List>
+              {lists.map((list) => (
+                <ListItem key={list.id} disablePadding>
+                  <ListItemButton
+                    component={NavLink}
+                    to={`/home/task-list/${list.id}`}
+                    selected={location.pathname === `/home/task-list/${list.id}`}
+                    sx={{
+                      "&.active, &:hover, &[aria-selected='true']": {
+                        backgroundColor: "rgba(0, 0, 0, 0.08)",
+                        borderRadius: "8px",
+                        mx: 1,
+                        width: "calc(100% - 16px)",
+                      },
+                      my: 0.5,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <ListAltIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={list.name} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          {/* Botón fijo abajo */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              p: 2,
+              bgcolor: "background.paper",
+              borderTop: "1px solid #eee",
+              textAlign: "center",
+            }}
+          >
+            <IconButton
+              color="primary"
+              size="large"
+              onClick={handleAddList}
+              sx={{ borderRadius: 2 }}
+              aria-label="Add new list"
+            >
+              <AddIcon />
+              <Typography sx={{ ml: 1, fontWeight: 500, fontSize: 16 }}>
+                New List
+              </Typography>
+            </IconButton>
+          </Box>
         </Drawer>
         {/* Drawer desktop */}
         <Drawer
@@ -232,6 +284,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
               width: drawerWidth,
               boxShadow: 3,
               height: "100vh",
+              position: "relative",
             },
           }}
           open
@@ -265,29 +318,72 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             ))}
           </List>
           <Divider />
-          <List>
-            {secondaryItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
-                <ListItemButton
-                  component={NavLink}
-                  to={item.path}
-                  selected={isActive(item.path)}
-                  sx={{
-                    "&.active, &:hover, &[aria-selected='true']": {
-                      backgroundColor: "rgba(0, 0, 0, 0.08)",
-                      borderRadius: "8px",
-                      mx: 1,
-                      width: "calc(100% - 16px)",
-                    },
-                    my: 0.5,
-                  }}
-                >
-                  <ListItemIcon>{item.icon}</ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
+          <Typography variant="subtitle2" sx={{ px: 2, pt: 1, color: "text.secondary" }}>
+            My Lists
+          </Typography>
+          {/* Box scrolleable para las listas */}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              pb: 7, // espacio para el botón
+              position: "relative",
+              minHeight: 0,
+              maxHeight: "calc(100vh - 260px)", // ajusta según tu diseño
+            }}
+          >
+            <List>
+              {lists.map((list) => (
+                <ListItem key={list.id} disablePadding>
+                  <ListItemButton
+                    component={NavLink}
+                    to={`/home/task-list/${list.id}`}
+                    selected={location.pathname === `/home/task-list/${list.id}`}
+                    sx={{
+                      "&.active, &:hover, &[aria-selected='true']": {
+                        backgroundColor: "rgba(0, 0, 0, 0.08)",
+                        borderRadius: "8px",
+                        mx: 1,
+                        width: "calc(100% - 16px)",
+                      },
+                      my: 0.5,
+                    }}
+                  >
+                    <ListItemIcon>
+                      <ListAltIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={list.name} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+          {/* Botón fijo abajo */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              p: 2,
+              bgcolor: "background.paper",
+              borderTop: "1px solid #eee",
+              textAlign: "center",
+            }}
+          >
+            <IconButton
+              color="primary"
+              size="large"
+              onClick={handleAddList}
+              sx={{ borderRadius: 2 }}
+              aria-label="Add new list"
+            >
+              <AddIcon />
+              <Typography sx={{ ml: 1, fontWeight: 500, fontSize: 16 }}>
+                New List
+              </Typography>
+            </IconButton>
+          </Box>
         </Drawer>
       </Box>
       <Main>

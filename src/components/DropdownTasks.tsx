@@ -9,11 +9,13 @@ interface DropdownTasksProps {
   tasks: Task[]
   title?: string
   onOpenModal?: (task: Task) => void
+  noTasks?: string
 }
 
 export default function DropdownTasks({
   tasks,
   title = "Tareas completadas",
+  noTasks = "No hay tareas",
   onOpenModal
 }: DropdownTasksProps) {
   const [open, setOpen] = useState(false)
@@ -49,7 +51,7 @@ export default function DropdownTasks({
         <Box sx={{ mt: 1 }}>
           {tasks.length === 0 ? (
             <Typography variant="body2" sx={{ color: "primary.main", px: 2, py: 1 }}>
-              No hay tareas completadas.
+              {noTasks}
             </Typography>
           ) : (
             tasks.map((task) => (

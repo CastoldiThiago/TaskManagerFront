@@ -10,9 +10,10 @@ import { es } from "date-fns/locale"
 interface TaskItemProps {
   task: Task
   onOpenModal?: (task: Task) => void
+  hideCheckbox?: boolean
 }
 
-export default function TaskItem({ task, onOpenModal }: TaskItemProps) {
+export default function TaskItem({ task, onOpenModal, hideCheckbox }: TaskItemProps) {
   const { changeStateTask } = useTaskContext()
   const { lists } = useTaskContext()
 
@@ -46,6 +47,7 @@ export default function TaskItem({ task, onOpenModal }: TaskItemProps) {
         },
       }}
     >
+      {!hideCheckbox && (
       <Checkbox
         checked={task.status === "DONE"}
         onClick={e => e.stopPropagation()}
@@ -57,6 +59,7 @@ export default function TaskItem({ task, onOpenModal }: TaskItemProps) {
           },
         }}
       />
+      )}
 
       <Box sx={{ flex: 1, ml: 1, minWidth: 0 }}>
         <Typography

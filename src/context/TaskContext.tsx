@@ -2,13 +2,14 @@ import React from "react";
 import { createContext, useContext, type ReactNode } from "react";
 import { useTasks } from "../hooks/useTasks";
 import { useLists } from "../hooks/useLists";
-import type { Task, TaskList, TaskFilter, CreateTask, Status } from "../types";
+import type { Task, TaskList, TaskFilter, CreateTask, Status, TaskListComplete } from "../types";
 
 interface TaskContextType {
   tasks: Task[];
   lists: TaskList[];
   isLoading: boolean;
   error: Error | null;
+  setTasks: (tasks: Task[] | ((prev: Task[]) => Task[])) => void; 
   fetchTasks: (filter?: TaskFilter) => Promise<void>;
   fetchMyDayTasks: () => Promise<void>;
   fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>;
@@ -18,6 +19,7 @@ interface TaskContextType {
   changeStateTask: (id: string, state: Status) => Promise<Task>;
   fetchLists: () => Promise<void>;
   createList: (list: Partial<TaskList>) => Promise<TaskList>;
+  getList: (id: string) => Promise<TaskListComplete>;
   updateList: (id: string, updates: Partial<TaskList>) => Promise<TaskList>;
   deleteList: (id: string) => Promise<void>;
 }
@@ -29,6 +31,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     tasks,
     loading: tasksLoading,
     error: tasksError,
+    setTasks,
     fetchTasks,
     fetchMyDayTasks,
     fetchCalendarTasks,
@@ -44,6 +47,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     error: listsError,
     fetchLists,
     createList,
+    getList,
     updateList,
     deleteList,
   } = useLists({ autoFetch: true });
@@ -58,6 +62,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         lists,
         isLoading,
         error,
+        setTasks,
         fetchTasks,
         fetchMyDayTasks,
         fetchCalendarTasks,
@@ -68,6 +73,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         fetchLists,
         createList,
         updateList,
+        getList,
         deleteList,
       }}
     >

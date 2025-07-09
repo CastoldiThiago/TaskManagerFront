@@ -1,7 +1,7 @@
 import React from "react"
 // Servicios específicos para listas de tareas
 import apiClient from "./client"
-import type { TaskList } from "../../types"
+import type { TaskList, TaskListComplete } from "../../types"
 
 interface ApiResponse<T> {
   data: T
@@ -16,8 +16,8 @@ export const listService = {
   },
 
   // Obtener una lista específica con sus tareas
-  async getList(id: string): Promise<TaskList> {
-    const response = await apiClient.get<TaskList>(`/task-lists/${id}`)
+  async getList(id: string | undefined): Promise<TaskListComplete> {
+    const response = await apiClient.get<TaskListComplete>(`/task-lists/${id}`)
     return response.data
   },
 

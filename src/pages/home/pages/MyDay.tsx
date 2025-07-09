@@ -84,8 +84,9 @@ export default function MyDayPage() {
         </Box>
         <DropdownTasks
           tasks={tasks.filter(t => t.status === "DONE")}
-          title="Completadas"
+          title="Completed"
           onOpenModal={handleOpenEdit}
+          noTasks="No completed tasks yet."
         />
         
       </Box>

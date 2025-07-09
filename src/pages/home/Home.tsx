@@ -16,22 +16,22 @@ const Home: React.FC = () => {
 
     return (
       <TitleProvider>
+      <TaskProvider>
       {/* Barra lateral izquierda */}
       <ResponsiveSideBar>
 
       {/* Contenido principal */}
-        <TaskProvider>
         
         <Routes>
           <Route index element={<HomePage />} />
           <Route path="all-my-tasks" element={<AllMyTasks />} />
           <Route path="todo" element={<ToDo />} />
-          <Route path="task-list" element={<TaskList />} />
+          <Route path="task-list/:id" element={<TaskList />} />
           <Route path="calendar" element={<Calendar />} />
           <Route path="my-day" element={<MyDay />} />
         </Routes>
-        </TaskProvider>
       </ResponsiveSideBar>
+      </TaskProvider>
       </TitleProvider>
     
     );

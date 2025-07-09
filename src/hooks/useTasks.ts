@@ -8,11 +8,23 @@ interface UseTasksOptions {
 }
 
 export function useTasks(options: UseTasksOptions = {}) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasksState] = useState<Task[]>([])
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [filter, setFilter] = useState<TaskFilter | undefined>(options.initialFilter);
 
+  
+
+  function setTasks(
+    value: Task[] | ((prev: Task[]) => Task[])
+  ) {
+    if (typeof value === "function") {
+      setTasksState(value as (prev: Task[]) => Task[])
+    } else {
+      setTasksState(value)
+    }
+  }
+  
   const fetchTasks = useCallback(
     async (currentFilter?: TaskFilter) => {
       try {
@@ -112,12 +124,10 @@ export function useTasks(options: UseTasksOptions = {}) {
     try {
       setLoading(true);
       setError(null);
-      console.log("Changing task state:", id, state);
       const updatedTask = await taskService.changeStateTask(id, state);
       setTasks((prevTasks) =>
         prevTasks.map((task) => (task.id === id ? updatedTask : task))
       );
-      console.log("Task state changed successfully:", updatedTask);
       return updatedTask;
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Error al cambiar el estado de la tarea"));
@@ -139,6 +149,7 @@ export function useTasks(options: UseTasksOptions = {}) {
     loading,
     error,
     filter,
+    setTasks,
     setFilter,
     fetchTasks,
     fetchMyDayTasks,
