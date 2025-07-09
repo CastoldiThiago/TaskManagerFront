@@ -9,7 +9,7 @@ export const taskService = {
     if (filters) {
       if (filters.listId) params.append("listId", filters.listId.toString());
       if (filters.dueDate) params.append("dueDate", filters.dueDate.toISOString());
-      if (filters.completed !== undefined) params.append("completed", filters.completed.toString());
+      if (filters.status !== undefined) params.append("status", filters.status.toString());
     }
 
     const response = await apiClient.get<Task[]>(`/tasks?${params.toString()}`);

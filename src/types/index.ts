@@ -24,34 +24,27 @@ export interface CreateTask {
   movedToMyDay?: boolean;
   movedDate?: string | Date | null;
 }
+  
+export interface TaskList {
+  id: string
+  name: string
+  description?: string
+  tasks?: Task[]
+  createdAt: Date
+  updatedAt: Date
+}
+  
+export interface TaskFilter {
+  listId?: string
+  dueDate?: Date
+  status?: Status
+  search?: string
+  isMyDay?: boolean
+}
 
-  export interface SubTask {
-    id: string
-    title: string
-    completed: boolean
-  }
-  
-  export interface TaskList {
-    id: string
-    name: string
-    description?: string
-    tasks?: Task[]
-    createdAt: Date
-    updatedAt: Date
-  }
-  
-  export interface TaskFilter {
-    listId?: string
-    dueDate?: Date
-    completed?: boolean
-    search?: string
-    isImportant?: boolean
-    isMyDay?: boolean
-  }
-  
-  export interface User {
-    id: string
-    username: string
-    email: string
-  }
+export interface User {
+  id: string
+  username: string
+  email: string
+}
   

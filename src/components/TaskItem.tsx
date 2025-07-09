@@ -9,9 +9,10 @@ import { es } from "date-fns/locale"
 
 interface TaskItemProps {
   task: Task
+  onOpenModal?: (task: Task) => void
 }
 
-export default function TaskItem({ task }: TaskItemProps) {
+export default function TaskItem({ task, onOpenModal }: TaskItemProps) {
   const { changeStateTask } = useTaskContext()
   const { lists } = useTaskContext()
 
@@ -21,7 +22,8 @@ export default function TaskItem({ task }: TaskItemProps) {
   }
 
   const handleClick = () => {
-    console.log("Abrir modal para editar tarea:", task)
+    if (onOpenModal) onOpenModal(task)
+    else console.log("Abrir modal para editar tarea:", task)
   }
 
   return (

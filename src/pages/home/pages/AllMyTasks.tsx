@@ -1,12 +1,144 @@
-import React from 'react';
+import React, { useState, useMemo, useEffect } from "react"
+import {
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Stack,
+  Divider,
+  TextField,
+} from "@mui/material"
+import DropdownTasks from "../../../components/DropdownTasks"
+import EditTask from "../../../components/EditTask"
+import { useTaskContext } from "../../../context/TaskContext"
+import type { Task } from "../../../types"
+import AddTask from "../../../components/AddTask"
 
-const AllMyTasks: React.FC = () => {
+const statusOptions = [
+  { value: "", label: "All" },
+  { value: "TODO", label: "To do" },
+  { value: "IN_PROGRESS", label: "In progress" },
+  { value: "DONE", label: "Completed" },
+]
+
+const orderOptions = [
+  { value: "dueDate", label: "Due date" },
+  { value: "title", label: "Title" },
+]
+
+export default function AllMyTasks() {
+  const { tasks, lists, fetchTasks } = useTaskContext()
+  const [status, setStatus] = useState<string>("")
+  const [order, setOrder] = useState<string>("createdAt")
+  const [search, setSearch] = useState("")
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+
+  useEffect(() => {
+    fetchTasks()
+  }, [fetchTasks])
+
+  // Filtering and ordering
+  const filteredTasks = useMemo(() => {
+    let filtered = tasks
+    if (status) filtered = filtered.filter(t => t.status === status)
+    if (search) filtered = filtered.filter(t =>
+      t.title.toLowerCase().includes(search.toLowerCase())
+    )
+    return [...filtered].sort((a, b) => {
+      if (order === "title") return a.title.localeCompare(b.title)
+      if (order === "dueDate") {
+        if (!a.dueDate) return 1
+        if (!b.dueDate) return -1
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      }
+      // createdAt
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  }, [tasks, status, order, search])
+
+  // Group by list
+  const groupedByList = useMemo(() => {
+    const groups: Record<string, Task[]> = {}
+    filteredTasks.forEach(task => {
+      const listName = lists.find(l => l.id === task.listId)?.name || "No list"
+      if (!groups[listName]) groups[listName] = []
+      groups[listName].push(task)
+    })
+    return groups
+  }, [filteredTasks, lists])
+
+  const handleOpenEdit = (task: Task) => {
+    setSelectedTask(task)
+    setEditOpen(true)
+  }
+  const handleCloseEdit = () => {
+    setEditOpen(false)
+    setSelectedTask(null)
+  }
+
   return (
-    <div>
-      <h1>Todas mis tareas</h1>
-      <p>Aquí se mostrarán todas tus tareas.</p>
-    </div>
-  );
-};
+    <Box sx={{ p: 3, maxHeight: "100vh", overflowY: "auto" }}>
 
-export default AllMyTasks;
+      <Typography variant="h4" fontWeight={700} mb={2}>
+        All my tasks
+      </Typography>
+      <Box sx={{ maxWidth: 400 }}>
+        <AddTask />
+      </Box>
+
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={2} mt={2}>
+        <FormControl size="small" sx={{ minWidth: 140 }}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={status}
+            label="Status"
+            onChange={e => setStatus(e.target.value)}
+          >
+            {statusOptions.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl size="small" sx={{ minWidth: 180 }}>
+          <InputLabel>Order by</InputLabel>
+          <Select
+            value={order}
+            label="Order by"
+            onChange={e => setOrder(e.target.value)}
+          >
+            {orderOptions.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <TextField
+          size="small"
+          label="Search"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </Stack>
+      <Divider sx={{ mb: 2 }} />
+
+      {/* Grouped by list using DropdownTasks */}
+      {Object.entries(groupedByList).map(([listName, tasks]) => (
+        <DropdownTasks
+          key={listName}
+          tasks={tasks}
+          title={listName}
+          onOpenModal={handleOpenEdit}
+        />
+      ))}
+
+      <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} />
+      
+    </Box>
+  )
+}

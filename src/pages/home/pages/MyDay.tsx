@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { useEffect } from "react"
 import { useTaskContext } from "../../../context/TaskContext"
 import AddTask from "../../../components/AddTask"
@@ -6,10 +6,23 @@ import TaskItem from "../../../components/TaskItem"
 import { Box, Typography, CircularProgress, Alert, Paper } from "@mui/material"
 import { useTitle } from "../../../context/TitleContext"
 import DropdownTasks from "../../../components/DropdownTasks"
+import { Task } from "../../../types"
+import EditTask from "../../../components/EditTask"
 
 export default function MyDayPage() {
   const { tasks, isLoading, error, fetchMyDayTasks } = useTaskContext()
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
   const { setTitle } = useTitle()
+
+  const handleOpenEdit = (task: Task) => {
+    setSelectedTask(task)
+    setEditOpen(true)
+  }
+  const handleCloseEdit = () => {
+    setEditOpen(false)
+    setSelectedTask(null)
+  }
 
   useEffect(() => {
     setTitle("Mi Día")
@@ -66,12 +79,13 @@ export default function MyDayPage() {
 
         <Box>
           {tasks.filter(t => t.status !== "DONE").map((task) => (
-            <TaskItem key={task.id} task={task} />
+            <TaskItem key={task.id} task={task} onOpenModal={handleOpenEdit}/>
           ))}
         </Box>
         <DropdownTasks
           tasks={tasks.filter(t => t.status === "DONE")}
           title="Completadas"
+          onOpenModal={handleOpenEdit}
         />
         
       </Box>
@@ -92,6 +106,8 @@ export default function MyDayPage() {
           <AddTask isInMyDay />
         </Box>
       </Box>
+      {/* EditTask modal */}
+      <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} />
     </Box>
   )
 }

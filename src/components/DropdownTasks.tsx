@@ -8,14 +8,15 @@ import type { Task } from "../types"
 interface DropdownTasksProps {
   tasks: Task[]
   title?: string
+  onOpenModal?: (task: Task) => void
 }
 
 export default function DropdownTasks({
   tasks,
   title = "Tareas completadas",
+  onOpenModal
 }: DropdownTasksProps) {
   const [open, setOpen] = useState(false)
-    console.log("DropdownTasks rendered with tasks:", tasks)
   return (
     <Box sx={{ mb: 2 }}>
       <Box
@@ -47,12 +48,12 @@ export default function DropdownTasks({
       <Collapse in={open}>
         <Box sx={{ mt: 1 }}>
           {tasks.length === 0 ? (
-            <Typography variant="body2" sx={{ color: "#bdbdbd", px: 2, py: 1 }}>
+            <Typography variant="body2" sx={{ color: "primary.main", px: 2, py: 1 }}>
               No hay tareas completadas.
             </Typography>
           ) : (
             tasks.map((task) => (
-              <TaskItem key={task.id} task={task} />
+              <TaskItem key={task.id} task={task} onOpenModal={onOpenModal} />
             ))
           )}
         </Box>
