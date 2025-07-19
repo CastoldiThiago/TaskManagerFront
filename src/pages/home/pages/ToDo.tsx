@@ -8,6 +8,7 @@ import {
   MenuItem,
   Stack,
   Paper,
+  CircularProgress,
 } from "@mui/material"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { useTaskContext } from "../../../context/TaskContext"
@@ -15,6 +16,7 @@ import type { Task, Status } from "../../../types"
 import TaskItem from "../../../components/TaskItem"
 import EditTask from "../../../components/EditTask"
 import { useTitle } from "../../../context/TitleContext"
+import AddTask from "../../../components/AddTask"
 
 const statusPanels: { key: Status; label: string }[] = [
   { key: "TODO", label: "To Do" },
@@ -28,7 +30,7 @@ const orderOptions = [
 ]
 
 export default function ToDo() {
-  const { tasks, lists, changeStateTask, fetchTasks, setTasks } = useTaskContext()
+  const { tasks, lists, changeStateTask, fetchTasks, setTasks, isLoading, deleteTask } = useTaskContext()
   const [selectedList, setSelectedList] = useState<string>("")
   const [editOpen, setEditOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -47,6 +49,11 @@ export default function ToDo() {
   const handleCloseEdit = () => {
     setEditOpen(false)
     setSelectedTask(null)
+  }
+
+  const handleDeleteTask = async (task: Task) => {
+    await deleteTask(task.id)
+    await fetchTasks()
   }
 
   // Filtrar tareas por lista seleccionada
@@ -139,6 +146,10 @@ export default function ToDo() {
       }
     }
   }
+  if (isLoading) return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+      <CircularProgress size={40} color="secondary" />
+    </Box>)
 
   return (
     <Box sx={{ p: 3, height: "100vh", overflow: "auto" }}>
@@ -229,12 +240,17 @@ export default function ToDo() {
                               task={task}
                               hideCheckbox
                               onOpenModal={handleOpenEdit}
+                              inTodoPage
+                              onDelete={handleDeleteTask}
                             />
                           </div>
                         )}
                       </Draggable>
                     ))}
                     {provided.placeholder}
+                    {panel.key === "TODO" && tasksByStatus[panel.key].length === 0 && (
+                    <AddTask/>
+                    )}
                   </Box>
                 </Paper>
               )}

@@ -28,8 +28,8 @@ import type { Task, Status, TaskList } from "../types"
 import { useTaskContext } from "../context/TaskContext"
 
 interface EditTaskProps {
-  open: boolean
-  onClose: () => void
+  open?: boolean
+  onClose?: () => void
   task: Task | null
 }
 
@@ -39,7 +39,11 @@ const statusLabels: Record<Status, string> = {
   DONE: "Done",
 }
 
-export default function EditTask({ open, onClose, task }: EditTaskProps) {
+export default function EditTask({
+   open = false, 
+   onClose = ()=> {},
+   task,
+  }: EditTaskProps) {
   const { lists, updateTask } = useTaskContext()
   const [title, setTitle] = useState(task?.title ?? "")
   const [description, setDescription] = useState(task?.description ?? "")
@@ -48,9 +52,7 @@ export default function EditTask({ open, onClose, task }: EditTaskProps) {
   )
   const [status, setStatus] = useState<Status>(task?.status ?? "TODO")
   const [movedToMyDay, setMovedToMyDay] = useState(!!task?.movedToMyDay)
-  const [selectedList, setSelectedList] = useState<TaskList | null>(
-    lists.find(l => l.id === task?.listId) ?? null
-  )
+  const [selectedList, setSelectedList] = useState<TaskList | null>(task?.listId ? lists.find(l => l.id === task.listId) || null : null)
 
   // Popover states
   const [listAnchorEl, setListAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -73,7 +75,6 @@ export default function EditTask({ open, onClose, task }: EditTaskProps) {
   }, [task, lists])
 
   if (!task) return null
-
   // List popover handlers
   const handleListClick = (event: React.MouseEvent) => {
     event.stopPropagation()
@@ -116,6 +117,7 @@ export default function EditTask({ open, onClose, task }: EditTaskProps) {
     })
     onClose()
   }
+  
 
   return (
     <Modal open={open} onClose={onClose}>

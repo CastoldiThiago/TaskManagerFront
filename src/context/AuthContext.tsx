@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useGoogleLogin } from '@react-oauth/google';
 
 function parseJwt(token: string): any {
   try {
@@ -25,68 +24,122 @@ function isTokenExpired(token: string | null): boolean {
   return decoded.exp < now;
 }
 
-
 interface AuthContextProps {
-    isAuthenticated: boolean;
-    logout: () => void;
-    login: (jwt: string) => void;
-    token: string | null;
-    name: string | null;
+  isAuthenticated: boolean;
+  logout: () => void;
+  login: (jwt: string) => void;
+  refresh: () => Promise<string | null>;
+  token: string | null;
+  name: string | null;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [token, setToken] = useState<string | null>(null);
-    const [name, setName] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
 
-    const isAuthenticated = !!token;
-    
-    const login = (jwt:string) => {
-        if (isTokenExpired(jwt)) {
-            logout();
-            return;
-        }
-        setToken(jwt);
-        const decoded = parseJwt(jwt);
-        localStorage.setItem('authToken', jwt);
-        if (decoded?.name) {
-            localStorage.setItem('name', decoded.name);
-            setName(decoded.name)
-        }
+  const isAuthenticated = !!token;
+
+  const login = (jwt: string) => {
+    if (isTokenExpired(jwt)) {
+      logout();
+      return;
     }
+    setToken(jwt);
+    localStorage.setItem('authToken', jwt);
 
-    const logout = () => {
-        setToken(null);
-        setName(null)
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('name')
+    const decoded = parseJwt(jwt);
+    if (decoded?.name) {
+      setName(decoded.name);
+      localStorage.setItem('name', decoded.name);
+    }
+  };
+
+  const logout = async () => {
+    setToken(null);
+    setName(null);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('name');
+
+    // Pedir al backend que elimine la cookie
+    try {
+      await fetch('http://localhost:8080/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      console.warn('Error cerrando sesión en el backend:', e);
+    }
+  };
+
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      const res = await fetch('http://localhost:8080/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include', // 🔥 enviar cookie refreshToken
+      });
+
+      if (!res.ok) throw new Error('Refresh falló');
+
+      const data = await res.json();
+      const newToken = data.accessToken;
+
+      setToken(newToken);
+      localStorage.setItem('authToken', newToken);
+
+      const decoded = parseJwt(newToken);
+      if (decoded?.name) {
+        setName(decoded.name);
+        localStorage.setItem('name', decoded.name);
+      }
+
+      return newToken;
+    } catch (err) {
+      console.error('Error al refrescar token:', err);
+      logout();
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem('authToken');
+
+    const checkToken = async () => {
+      if (storedToken && !isTokenExpired(storedToken)) {
+        setToken(storedToken);
+        const decoded = parseJwt(storedToken);
+        if (decoded?.name) {
+          setName(decoded.name);
+        }
+      } else {
+        await refreshAccessToken();
+      }
     };
 
-    useEffect(() => {
-        const storedToken = localStorage.getItem('authToken');
-        if (storedToken && !isTokenExpired(storedToken)) {
-            setToken(storedToken);
-            const decoded = parseJwt(storedToken);
-            if (decoded?.name) {
-                setName(decoded.name);
-            }
-        } else {
-            logout();
-        }
-    }, []);
+    checkToken();
+  }, []);
 
-    return (
-        <AuthContext.Provider value={{ isAuthenticated, logout, token, name,  login }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        logout,
+        login,
+        refresh: refreshAccessToken,
+        token,
+        name,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth debe usarse dentro de AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe usarse dentro de AuthProvider');
+  }
+  return context;
 };

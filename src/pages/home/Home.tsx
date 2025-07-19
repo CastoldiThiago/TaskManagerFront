@@ -28,7 +28,7 @@ const Home: React.FC = () => {
           <Route path="todo" element={<ToDo />} />
           <Route path="task-list/:id" element={<TaskList />} />
           <Route path="calendar" element={<Calendar />} />
-          <Route path="my-day" element={<MyDay />} />
+          <Route index path="my-day" element={<MyDay />} />
         </Routes>
       </ResponsiveSideBar>
       </TaskProvider>

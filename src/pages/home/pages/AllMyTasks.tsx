@@ -11,6 +11,7 @@ import {
   TextField,
   ToggleButton,
   ToggleButtonGroup,
+  CircularProgress,
 } from "@mui/material"
 import DropdownTasks from "../../../components/DropdownTasks"
 import EditTask from "../../../components/EditTask"
@@ -34,8 +35,8 @@ const orderOptions = [
 ]
 
 export default function AllMyTasks() {
-  const { tasks, lists, fetchTasks } = useTaskContext()
-  const [filter, setFilter] = useState<string>("")
+  const { tasks, lists, fetchTasks, isLoading, deleteTask } = useTaskContext()
+  const [filter, setFilter] = useState<string>("TODO")
   const [order, setOrder] = useState<string>("dueDate")
   const [search, setSearch] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -98,6 +99,11 @@ export default function AllMyTasks() {
     setSelectedTask(null)
   }
 
+  const handleDeleteTask = (task: Task) => {
+    deleteTask(task.id),
+    fetchTasks()
+  }
+
   return (
     <Box sx={{ p: 3, maxHeight: "100vh", overflowY: "auto" }}>
       <Box sx={{ maxWidth: 400 }}>
@@ -152,22 +158,31 @@ export default function AllMyTasks() {
       </Stack>
       <Divider sx={{ mb: 2 }} />
 
-      {/* Show grouped or flat */}
-      {viewMode === "grouped" ? (
-        Object.entries(groupedByList).map(([listName, tasks]) => (
-          <DropdownTasks
-            key={listName}
-            tasks={tasks}
-            title={listName}
-            onOpenModal={handleOpenEdit}
-          />
-        ))
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <CircularProgress />
+        </Box>
       ) : (
-        <DropdownTasks
-          tasks={filteredTasks}
-          title="All tasks"
-          onOpenModal={handleOpenEdit}
-        />
+        (viewMode == "grouped") ? (
+          Object.entries(groupedByList).map(([listName, tasks]) => (
+            <DropdownTasks
+              key={listName}
+              tasks={tasks}
+              title={listName}
+              initialOpen
+              onOpenModal={handleOpenEdit}
+              onDelete={handleDeleteTask}
+            />
+          ))
+        ) : (
+          <DropdownTasks
+            tasks={filteredTasks}
+            title="All tasks"
+            onOpenModal={handleOpenEdit}
+            initialOpen={true}
+            onDelete={handleDeleteTask}
+          />
+        )
       )}
 
       <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} />

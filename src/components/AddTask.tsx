@@ -22,18 +22,18 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
 import { format, set } from "date-fns"
 import { useLists } from "../hooks/useLists"
 import { TaskList, Task, CreateTask } from "../types"
-import { useTasks } from "../hooks/useTasks"
-import { taskService } from "../services/api/tasks"
 import { useTaskContext } from "../context/TaskContext"
 
 interface AddTaskProps {
   isInMyDay?: boolean
+  handleTaskCreated?: (task: Task) => void
+  taskList?: TaskList | null
 }
 
-export default function AddTask({ isInMyDay }: AddTaskProps) {
+export default function AddTask({ isInMyDay, handleTaskCreated, taskList}: AddTaskProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [taskName, setTaskName] = useState("")
-  const [selectedList, setSelectedList] = useState<TaskList | null>(null)
+  const [selectedList, setSelectedList] = useState<TaskList | null>(taskList? taskList : null)
   const [dueDate, setDueDate] = useState<Date | null>(null)
   const {lists} = useLists()
   const {createTask} = useTaskContext()
@@ -54,6 +54,9 @@ export default function AddTask({ isInMyDay }: AddTaskProps) {
   useEffect(() => {
     if (isExpanded && inputRef.current) {
       inputRef.current.focus()
+    }
+    if (taskList) {
+      setSelectedList(taskList)
     }
   }, [isExpanded])
 
@@ -109,6 +112,16 @@ export default function AddTask({ isInMyDay }: AddTaskProps) {
           console.error("Error creating task:", error)
         })
 
+      // If handleTaskCreated is provided, call it with the new task
+      if (handleTaskCreated) {
+        handleTaskCreated({
+          ...newTask,
+          id: "", // ID will be set by the backend
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        } as Task)};
+        
+      // Reset form after submission
       setTaskName("")
       setSelectedList(null)
       setDueDate(null)
@@ -355,23 +368,27 @@ export default function AddTask({ isInMyDay }: AddTaskProps) {
         onClick={(e) => e.stopPropagation()}
       >
         <List dense>
-          {lists.map((list) => (
-            <ListItemButton
-              key={list.id}
-              onClick={() => handleListSelect(list)}
-              selected={selectedList?.id === list.id}
-              sx={{
-                "&.Mui-selected": {
-                  backgroundColor: "primary.main",
-                },
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-              }}
-            >
-              <ListItemText primary={list.name} />
-            </ListItemButton>
-          ))}
+          {lists.length === 0 ? (
+            <ListItemText primary="There are no lists" sx={{ px: 2, py: 1 }} />
+          ) : (
+            lists.map((list) => (
+              <ListItemButton
+                key={list.id}
+                onClick={() => handleListSelect(list)}
+                selected={selectedList?.id === list.id}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "primary.main",
+                  },
+                  "&:hover": {
+                    backgroundColor: "primary.dark",
+                  },
+                }}
+              >
+                <ListItemText primary={list.name} />
+              </ListItemButton>
+            )))}
+          
         </List>
       </Popover>
 

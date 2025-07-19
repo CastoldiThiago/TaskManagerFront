@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { GoogleLogin } from '@react-oauth/google';
+import apiClient from '../services/api/client';
 
 interface FormData {
     name: string;
@@ -55,76 +56,92 @@ const Login: React.FC = () => {
         setOpen(false);
       };
     
-      const onSubmit = async (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         setErrorMessage(null); // Limpiar mensajes de error globales
+
         try {
             if (isLoginMode) {
-                // Login
-                const response = await axios.post(`${config.backendUrl}/auth/login`, {
-                    email: data.email,
-                    password: data.password,
-                });
-                login(response.data); // Actualizar el estado del contexto
-                navigate('/home');
+            // Login
+            const response = await apiClient.post("/auth/login", {
+                email: data.email,
+                password: data.password,
+            });
+
+            const accessToken = response.data;
+
+            if (!accessToken) {
+                throw new Error("No se recibió el accessToken del servidor");
+            }
+
+            login(accessToken); // Usar AuthContext para guardar token y nombre
+            navigate("/home");
             } else {
-                // Register
-                await axios.post(`${config.backendUrl}/auth/register`, {
-                    name: data.name,
-                    email: data.email,
-                    password: data.password,
-                });
-                // Redirigir a la pantalla de verificación de correo
-                navigate('/verify-email', { state: { email: data.email } });
+            // Registro
+            await apiClient.post("/auth/register", {
+                name: data.name,
+                email: data.email,
+                password: data.password,
+            });
+
+            // Redirigir a verificación de correo
+            navigate("/verify-email", { state: { email: data.email } });
             }
         } catch (error: any) {
             if (error.response) {
-                const { status, data } = error.response;
-    
-                if (isLoginMode) {
-                    // Manejar errores específicos del login
-                    if (status === 401) {
-                        setErrorMessage(data); // Usuario o contraseña incorrectos
-                    } else {
-                        setErrorMessage('Ocurrió un error inesperado. Inténtalo de nuevo.');
-                    }
+            const { status, data } = error.response;
+
+            if (isLoginMode) {
+                if (status === 401) {
+                setErrorMessage(data || "Usuario o contraseña incorrectos");
                 } else {
-                    // Manejar errores específicos del registro
-                    if (status === 409) {
-                        if (data.includes('correo')) {
-                            setError('email', { type: 'manual', message: data });
-                        }
-                    } else if (status === 400) {
-                        setErrorMessage(data); // Mostrar mensaje de solicitud inválida
-                    } else {
-                        setErrorMessage('Ocurrió un error inesperado. Inténtalo de nuevo.');
-                    }
+                setErrorMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
                 }
             } else {
-                setErrorMessage('No se pudo conectar con el servidor. Inténtalo de nuevo.');
+                if (status === 409 && data?.includes("correo")) {
+                setError("email", { type: "manual", message: data });
+                } else if (status === 400) {
+                setErrorMessage(data);
+                } else {
+                setErrorMessage("Ocurrió un error inesperado. Inténtalo de nuevo.");
+                }
+            }
+            } else {
+            setErrorMessage("No se pudo conectar con el servidor. Inténtalo de nuevo.");
             }
         }
-    };
+        };
 
     const handleLoginSuccess = async (credentialResponse: any) => {
         const idToken = credentialResponse.credential;
 
-        // Enviás el idToken al backend para validarlo y generar tu propio JWT
-        const res = await fetch(`${config.backendUrl}/api/auth/google`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idToken }),
-        });
+        try {
+            const res = await fetch(`${config.backendUrl}/api/auth/google`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include', // 🔥 para recibir la cookie refreshToken
+            body: JSON.stringify({ idToken }),
+            });
 
-        if (res.ok) {
-        const { jwt } = await res.json();
-        login(jwt);
-        navigate('/home');
-        } else {
-        console.error('Error validando el token');
+            if (!res.ok) {
+            throw new Error('Error validando el token con Google');
+            }
+
+            const { jwt: accessToken } = await res.json();
+
+            if (!accessToken) {
+            throw new Error('No se recibió accessToken desde el backend');
+            }
+
+            login(accessToken); // Actualizar contexto y localStorage
+            navigate('/home');
+        } catch (error) {
+            console.error('Fallo el login con Google:', error);
+            setErrorMessage('Error al iniciar sesión con Google. Inténtalo de nuevo.');
+            // Podés mostrar un mensaje de error si querés
         }
-  };
+    };
 
     useEffect(() => {
         if (isAuthenticated && token) {

@@ -8,9 +8,10 @@ import { useTitle } from "../../../context/TitleContext"
 import DropdownTasks from "../../../components/DropdownTasks"
 import { Task } from "../../../types"
 import EditTask from "../../../components/EditTask"
+import { is } from "date-fns/locale"
 
 export default function MyDayPage() {
-  const { tasks, isLoading, error, fetchMyDayTasks } = useTaskContext()
+  const { tasks, isLoading, error, fetchMyDayTasks, setTasks, deleteTask } = useTaskContext()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const { setTitle } = useTitle()
@@ -24,8 +25,14 @@ export default function MyDayPage() {
     setSelectedTask(null)
   }
 
+  const handleDeleteTask = async (task: Task) => {
+    await deleteTask(task.id)
+    await fetchMyDayTasks()
+  }
+
   useEffect(() => {
-    setTitle("Mi Día")
+    setTasks([])
+    setTitle("My Day")
     fetchMyDayTasks()
   }, [fetchMyDayTasks])
 
@@ -35,7 +42,6 @@ export default function MyDayPage() {
   const day = today.getDate()
   const month = today.toLocaleString("default", { month: "long" })
   const year = today.getFullYear()
-  
   return (
     <Box
       sx={{
@@ -52,7 +58,11 @@ export default function MyDayPage() {
           </Typography>
       </Box>
 
-      {/* Lista de tareas scrollable */}
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+          <CircularProgress />
+        </Box>
+      )   :  (
       <Box
         sx={{
           flex: 1,
@@ -79,17 +89,23 @@ export default function MyDayPage() {
 
         <Box>
           {tasks.filter(t => t.status !== "DONE").map((task) => (
-            <TaskItem key={task.id} task={task} onOpenModal={handleOpenEdit}/>
+            <TaskItem key={task.id} task={task} onOpenModal={handleOpenEdit} onDelete={handleDeleteTask}/>
           ))}
         </Box>
-        <DropdownTasks
-          tasks={tasks.filter(t => t.status === "DONE")}
-          title="Completed"
-          onOpenModal={handleOpenEdit}
-          noTasks="No completed tasks yet."
-        />
+        {(!isLoading || tasks.length != 0) && (
+          <DropdownTasks
+            tasks={tasks.filter(t => t.status === "DONE")}
+            title="Completed"
+            onOpenModal={handleOpenEdit}
+            noTasks="No completed tasks yet."
+            onDelete={handleDeleteTask}
+            initialOpen
+          />
+        )}
         
       </Box>
+        
+      )}
 
       {/* AddTask fijo abajo */}
       <Box

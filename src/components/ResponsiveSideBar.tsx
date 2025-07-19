@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { styled, useTheme } from "@mui/material/styles"
 import Box from "@mui/material/Box"
@@ -21,7 +19,6 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import TodayIcon from "@mui/icons-material/Today"
 import AssignmentIcon from "@mui/icons-material/Assignment"
 import CheckBoxIcon from "@mui/icons-material/CheckBox"
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"
 import ListAltIcon from "@mui/icons-material/ListAlt"
 import LogoutIcon from "@mui/icons-material/Logout"
 import AddIcon from "@mui/icons-material/Add"
@@ -29,6 +26,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useTitle } from "../context/TitleContext"
 import { useTaskContext } from "../context/TaskContext"
+import { Button } from "@mui/material"
 
 const drawerWidth = 240
 
@@ -104,15 +102,15 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
     setIsClosing(false)
   }
 
-  const handleLogOut = () => {
-    logout()
-  }
+  const handleLogout = async () => {
+  await logout(); 
+  navigate("/");
+};
 
   const menuItems = [
-    { text: "Mi día", path: "/home/my-day", icon: <TodayIcon /> },
+    { text: "My Day", path: "/home/my-day", icon: <TodayIcon /> },
     { text: "All My Tasks", path: "/home/all-my-tasks", icon: <AssignmentIcon /> },
     { text: "To Do", path: "/home/todo", icon: <CheckBoxIcon /> },
-    { text: "Calendario", path: "/home/calendar", icon: <CalendarMonthIcon /> },
   ]
 
   const isActive = (path: string) => location.pathname === path
@@ -142,7 +140,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           <Typography variant="h5" noWrap component="div" sx={{ flexGrow: 1, textAlign: "start" }}>
             {title}
           </Typography>
-          <IconButton color="inherit" onClick={handleLogOut} edge="end">
+          <IconButton color="inherit" onClick={handleLogout} edge="end">
             <LogoutIcon />
             <Typography variant="body2" sx={{ ml: 1, display: { xs: "none", sm: "block" } }}>
               Cerrar sesión
@@ -215,7 +213,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             sx={{
               flex: 1,
               overflowY: "auto",
-              pb: 7, // espacio para el botón
+              pb: 10, // espacio para el botón
               position: "relative",
               minHeight: 0,
               maxHeight: "calc(100vh - 260px)", // ajusta según tu diseño
@@ -274,6 +272,8 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             </IconButton>
           </Box>
         </Drawer>
+
+
         {/* Drawer desktop */}
         <Drawer
           variant="permanent"
@@ -290,9 +290,20 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           open
         >
           <DrawerHeader>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            <Button onClick={()=>navigate("/home")} sx={{
+               textTransform: "none", 
+               width: "100%",
+               '&:focus': {
+                  outline: 'none',
+                },
+                '&.Mui-focusVisible': {
+                  boxShadow: 'none',
+                }
+               }}>
+            <Typography variant="h6" component="div">
               TaskManager
             </Typography>
+            </Button>
           </DrawerHeader>
           <List>
             {menuItems.map((item) => (
@@ -326,7 +337,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             sx={{
               flex: 1,
               overflowY: "auto",
-              pb: 7, // espacio para el botón
+              pb: 10, // espacio para el botón
               position: "relative",
               minHeight: 0,
               maxHeight: "calc(100vh - 260px)", // ajusta según tu diseño

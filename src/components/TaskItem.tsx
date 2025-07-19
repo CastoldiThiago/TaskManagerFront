@@ -1,25 +1,37 @@
 import React from "react"
 import { useTaskContext } from "../context/TaskContext"
 import type { Task } from "../types"
-import { Box, Checkbox, Typography } from "@mui/material"
+import { Box, Checkbox, IconButton, Typography } from "@mui/material"
 import CalendarIcon from "@mui/icons-material/CalendarToday"
 import ListIcon from "@mui/icons-material/FormatListBulleted"
-import { format } from "date-fns"
+import { format, set } from "date-fns"
 import { es } from "date-fns/locale"
+import { DeleteIcon, Trash } from "lucide-react"
+import DeleteItemModal from "./DeleteItemModal"
 
 interface TaskItemProps {
   task: Task
   onOpenModal?: (task: Task) => void
+  onDelete?: (task: Task) => void
   hideCheckbox?: boolean
+  inTodoPage?: boolean
+  onComplete?: (task: Task) => void
 }
 
-export default function TaskItem({ task, onOpenModal, hideCheckbox }: TaskItemProps) {
+export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage = false, onDelete, onComplete}: TaskItemProps) {
   const { changeStateTask } = useTaskContext()
   const { lists } = useTaskContext()
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false)
 
   const handleComplete = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation()
     await changeStateTask(task.id, task.status === "DONE" ? "TODO" : "DONE")
+    if (onComplete) onComplete({ ...task, status: task.status === "DONE" ? "TODO" : "DONE" })
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setDeleteModalOpen(true)
   }
 
   const handleClick = () => {
@@ -104,12 +116,38 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox }: TaskItemPr
                 }}
               >
                 <CalendarIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
-                {format(new Date(task.dueDate), "PPP", { locale: es })}
+                {inTodoPage ? format(new Date(task.dueDate), "dd/MM/yyyy", { locale: es }) :
+                              format(new Date(task.dueDate), "PPP", { locale: es })}
               </Typography>
             )}
           </Box>
         )}
       </Box>
+      {/* Botón eliminar */}
+      <IconButton
+        edge="end"
+        color="primary"
+        size="large"
+        sx={{ ml: 1 }}
+        onMouseDown={e => { e.stopPropagation(); handleDeleteClick(e); }}
+        aria-label="Delete task"
+      >
+        <Trash size={20} />
+      </IconButton>
+      <DeleteItemModal
+        open={deleteModalOpen}
+        onClose={(e?: React.SyntheticEvent) => {
+          if (e) e.stopPropagation();
+          setDeleteModalOpen(false);
+        }}
+        onConfirm={async (e?: React.SyntheticEvent) => {
+          if (e) e.stopPropagation();
+          if (onDelete) await onDelete(task)
+          setDeleteModalOpen(false)
+        }}
+        type="task"
+        name={task.title}
+      />
     </Box>
   )
 }

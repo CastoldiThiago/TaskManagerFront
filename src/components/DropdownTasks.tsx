@@ -9,18 +9,24 @@ interface DropdownTasksProps {
   tasks: Task[]
   title?: string
   onOpenModal?: (task: Task) => void
+  onDelete?: (task: Task) => void
   noTasks?: string
+  initialOpen?: boolean
+  onComplete?: (task: Task) => void
 }
 
 export default function DropdownTasks({
   tasks,
-  title = "Tareas completadas",
-  noTasks = "No hay tareas",
-  onOpenModal
+  title = "Completed Tasks",
+  noTasks = "No Tasks",
+  initialOpen = false,
+  onOpenModal,
+  onDelete,
+  onComplete
 }: DropdownTasksProps) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(initialOpen? initialOpen : false)
   return (
-    <Box sx={{ mb: 2 }}>
+    <Box sx={{ mb: 2}}>
       <Box
         sx={{
           display: "inline-flex",
@@ -55,7 +61,7 @@ export default function DropdownTasks({
             </Typography>
           ) : (
             tasks.map((task) => (
-              <TaskItem key={task.id} task={task} onOpenModal={onOpenModal} />
+              <TaskItem key={task.id} task={task} onOpenModal={onOpenModal} onDelete={onDelete} onComplete={onComplete}/>
             ))
           )}
         </Box>
