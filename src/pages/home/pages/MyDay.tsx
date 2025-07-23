@@ -11,7 +11,7 @@ import EditTask from "../../../components/EditTask"
 import { is } from "date-fns/locale"
 
 export default function MyDayPage() {
-  const { tasks, isLoading, error, fetchMyDayTasks, setTasks, deleteTask } = useTaskContext()
+  const { tasks, isLoading, error, fetchMyDayTasks, setTasks, deleteTask, lists} = useTaskContext()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editOpen, setEditOpen] = useState(false)
   const { setTitle } = useTitle()
@@ -31,10 +31,16 @@ export default function MyDayPage() {
   }
 
   useEffect(() => {
+    console.log("Cargando tareas del día")
     setTasks([])
     setTitle("My Day")
     fetchMyDayTasks()
-  }, [fetchMyDayTasks])
+  }, [fetchMyDayTasks, lists])
+
+  // Refresca tareas cuando se edita una tarea (por ejemplo, se quita de My Day)
+  const handleTaskUpdated = async () => {
+    await fetchMyDayTasks();
+  }
 
   // Ejemplo de presentación de la fecha de hoy
   const today = new Date()
@@ -92,7 +98,7 @@ export default function MyDayPage() {
             <TaskItem key={task.id} task={task} onOpenModal={handleOpenEdit} onDelete={handleDeleteTask}/>
           ))}
         </Box>
-        {(!isLoading || tasks.length != 0) && (
+        {(!isLoading && tasks.length != 0) && (
           <DropdownTasks
             tasks={tasks.filter(t => t.status === "DONE")}
             title="Completed"
@@ -124,7 +130,7 @@ export default function MyDayPage() {
         </Box>
       </Box>
       {/* EditTask modal */}
-      <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} />
+      <EditTask open={editOpen} onClose={handleCloseEdit} task={selectedTask} onTaskUpdated={handleTaskUpdated} />
     </Box>
   )
 }

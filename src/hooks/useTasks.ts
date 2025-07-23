@@ -57,20 +57,6 @@ export function useTasks(options: UseTasksOptions = {}) {
     }
   }, []);
 
-  const fetchCalendarTasks = useCallback(async (startDate: Date, endDate: Date) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const tasks = await taskService.getCalendarTasks(startDate, endDate);
-      setTasks(tasks);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error("Error al cargar las tareas del calendario"));
-      console.error("Error fetching calendar tasks:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const createTask = useCallback(async (task: CreateTask) => {
     try {
       setLoading(true);
@@ -120,6 +106,21 @@ export function useTasks(options: UseTasksOptions = {}) {
     }
   }, []);
 
+  const getTasksForList = useCallback(async (id: string) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await taskService.getTasksForList(id);
+        return response;
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error("Error al obtener las tareas de la lista"));
+        console.error("Error fetching tasks for list:", err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
   const changeStateTask = useCallback(async (id: string, state: Status) => {
     try {
       setLoading(true);
@@ -153,7 +154,7 @@ export function useTasks(options: UseTasksOptions = {}) {
     setFilter,
     fetchTasks,
     fetchMyDayTasks,
-    fetchCalendarTasks,
+    getTasksForList,
     createTask,
     updateTask,
     deleteTask,

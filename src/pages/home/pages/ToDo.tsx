@@ -12,7 +12,7 @@ import {
 } from "@mui/material"
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd"
 import { useTaskContext } from "../../../context/TaskContext"
-import type { Task, Status } from "../../../types"
+import type { Task, Status, TaskList } from "../../../types"
 import TaskItem from "../../../components/TaskItem"
 import EditTask from "../../../components/EditTask"
 import { useTitle } from "../../../context/TitleContext"
@@ -31,7 +31,7 @@ const orderOptions = [
 
 export default function ToDo() {
   const { tasks, lists, changeStateTask, fetchTasks, setTasks, isLoading, deleteTask } = useTaskContext()
-  const [selectedList, setSelectedList] = useState<string>("")
+  const [selectedList, setSelectedList] = useState<TaskList>()
   const [editOpen, setEditOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const {setTitle} = useTitle();
@@ -40,7 +40,11 @@ export default function ToDo() {
   useEffect(() => {
     fetchTasks()
     setTitle("To Do Board")
-  }, [fetchTasks])
+    // Si la lista seleccionada fue borrada, limpiar filtro
+    if (selectedList && !lists.find(l => l.id === selectedList.id)) {
+      setSelectedList(undefined);
+    }
+  }, [fetchTasks, lists])
 
     const handleOpenEdit = (task: Task) => {
     setSelectedTask(task)
@@ -60,7 +64,7 @@ export default function ToDo() {
   const filteredTasks = useMemo(
     () =>
       selectedList
-        ? tasks.filter((t) => t.listId === selectedList)
+        ? tasks.filter((t) => t.listId === selectedList.id)
         : tasks,
     [tasks, selectedList]
   )
@@ -100,8 +104,8 @@ export default function ToDo() {
     if (orderBy === "custom" && sourceStatus === destStatus) {
       setTasks((prevTasks: Task[]) => {
         // Filtra las tareas del panel
-        const panelTasks = prevTasks.filter(t => (t.status ?? "TODO") === sourceStatus && (!selectedList || t.listId === selectedList))
-        const otherTasks = prevTasks.filter(t => (t.status ?? "TODO") !== sourceStatus || (selectedList && t.listId !== selectedList))
+        const panelTasks = prevTasks.filter(t => (t.status ?? "TODO") === sourceStatus && (!selectedList || t.listId === selectedList.id))
+        const otherTasks = prevTasks.filter(t => (t.status ?? "TODO") !== sourceStatus || (selectedList && t.listId !== selectedList.id))
 
         // Encuentra el índice real en prevTasks
         const draggedTaskId = draggableId
@@ -119,7 +123,7 @@ export default function ToDo() {
         // Mantén el orden de los otros panels
         const newTasks: Task[] = []
         prevTasks.forEach(t => {
-          if ((t.status ?? "TODO") === sourceStatus && (!selectedList || t.listId === selectedList)) {
+          if ((t.status ?? "TODO") === sourceStatus && (!selectedList || t.listId === selectedList.id)) {
             // Solo agrega si está en el nuevo orden
             const idx = newPanelTasks.findIndex(nt => nt.id === t.id)
             if (idx !== -1) newTasks.push(newPanelTasks[idx])
@@ -156,9 +160,9 @@ export default function ToDo() {
       <FormControl size="small" sx={{ minWidth: 220, mb: 3, mr: 2 }}>
         <InputLabel>Filter by list</InputLabel>
         <Select
-          value={selectedList}
+          value={selectedList?.id}
           label="Filter by list"
-          onChange={(e) => setSelectedList(e.target.value)}
+          onChange={(e) => {setSelectedList(lists.find((list) => list.id == e.target.value))}}
         >
           <MenuItem value="">All lists</MenuItem>
           {lists.map((list) => (
@@ -248,8 +252,8 @@ export default function ToDo() {
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    {panel.key === "TODO" && tasksByStatus[panel.key].length === 0 && (
-                    <AddTask/>
+                    {panel.key === "TODO" && (
+                    <AddTask taskList={selectedList}/>
                     )}
                   </Box>
                 </Paper>

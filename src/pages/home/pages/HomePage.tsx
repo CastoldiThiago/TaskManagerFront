@@ -136,6 +136,7 @@ const HomePage = () => {
             </Typography>
             {overdueTasks.length > 0 ? (
               overdueTasks.map(task => (
+                console.log("Overdue task:", task),
                 <Box key={task.id} sx={{ mt: 1 }}>
                   <Typography variant="body2" color="error">
                     {task.title} – {format(new Date(task.dueDate!), 'MM/dd/yyyy')}

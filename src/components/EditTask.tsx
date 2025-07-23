@@ -31,6 +31,7 @@ interface EditTaskProps {
   open?: boolean
   onClose?: () => void
   task: Task | null
+  onTaskUpdated?: () => void
 }
 
 const statusLabels: Record<Status, string> = {
@@ -43,6 +44,7 @@ export default function EditTask({
    open = false, 
    onClose = ()=> {},
    task,
+   onTaskUpdated,
   }: EditTaskProps) {
   const { lists, updateTask } = useTaskContext()
   const [title, setTitle] = useState(task?.title ?? "")
@@ -115,7 +117,8 @@ export default function EditTask({
       movedDate: movedToMyDay ? new Date().toISOString() : undefined,
       listId: selectedList ? selectedList.id : undefined,
     })
-    onClose()
+    if (onTaskUpdated) onTaskUpdated();
+    onClose();
   }
   
 
@@ -260,7 +263,10 @@ export default function EditTask({
             <Typography variant="body2">My Day</Typography>
             <Switch
               checked={movedToMyDay}
-              onChange={e => setMovedToMyDay(e.target.checked)}
+              onChange={e => {
+                setMovedToMyDay(e.target.checked);
+                
+              }}
               color="primary"
             />
           </Stack>

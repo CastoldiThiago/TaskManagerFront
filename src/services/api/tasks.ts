@@ -53,14 +53,9 @@ export const taskService = {
     return response.data; // Devuelve directamente la tarea actualizada
   },
 
-  // Obtener tareas para la vista de calendario
-  async getCalendarTasks(startDate: Date, endDate: Date): Promise<Task[]> {
-    const params = new URLSearchParams({
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-    });
+  async getTasksForList(id: string): Promise<Task[]> {
+    const response = await apiClient.get<Task[]>(`/tasks/list/${id}`);
+    return response.data; // Devuelve directamente el array de tareas para la lista
+  }
 
-    const response = await apiClient.get<Task[]>(`/tasks/calendar?${params.toString()}`);
-    return response.data; // Devuelve directamente el array de tareas
-  },
 };

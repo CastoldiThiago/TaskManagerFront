@@ -4,7 +4,7 @@ import { Box, Button } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import AllMyTasks from './pages/AllMyTasks';
 import ToDo from './pages/ToDo';
-import TaskList from './pages/TaskList';
+import TaskListPage from './pages/TaskListPage';
 import Calendar from './pages/Calendar';
 import MyDay from './pages/MyDay';
 import HomePage from './pages/HomePage';
@@ -26,7 +26,7 @@ const Home: React.FC = () => {
           <Route index element={<HomePage />} />
           <Route path="all-my-tasks" element={<AllMyTasks />} />
           <Route path="todo" element={<ToDo />} />
-          <Route path="task-list/:id" element={<TaskList />} />
+          <Route path="task-list/:id" element={<TaskListPage />} />
           <Route path="calendar" element={<Calendar />} />
           <Route index path="my-day" element={<MyDay />} />
         </Routes>

@@ -10,9 +10,9 @@ interface TaskContextType {
   isLoading: boolean;
   error: Error | null;
   setTasks: (tasks: Task[] | ((prev: Task[]) => Task[])) => void; 
+  setLists: (lists: TaskList[] | ((prev: TaskList[]) => TaskList[])) => void;
   fetchTasks: (filter?: TaskFilter) => Promise<void>;
   fetchMyDayTasks: () => Promise<void>;
-  fetchCalendarTasks: (startDate: Date, endDate: Date) => Promise<void>;
   createTask: (task: CreateTask) => Promise<Task>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
@@ -22,6 +22,7 @@ interface TaskContextType {
   getList: (id: string) => Promise<TaskListComplete>;
   updateList: (id: string, updates: Partial<TaskList>) => Promise<TaskList>;
   deleteList: (id: string) => Promise<void>;
+  getTasksForList: (id: string) => Promise<Task[]>;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
@@ -34,7 +35,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     setTasks,
     fetchTasks,
     fetchMyDayTasks,
-    fetchCalendarTasks,
+    getTasksForList,
     createTask,
     updateTask,
     deleteTask,
@@ -50,6 +51,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
     getList,
     updateList,
     deleteList,
+    setLists,
   } = useLists({ autoFetch: true });
 
   const isLoading = tasksLoading || listsLoading;
@@ -65,7 +67,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         setTasks,
         fetchTasks,
         fetchMyDayTasks,
-        fetchCalendarTasks,
+        getTasksForList,
         createTask,
         updateTask,
         deleteTask,
@@ -75,6 +77,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         updateList,
         getList,
         deleteList,
+        setLists,
       }}
     >
       {children}

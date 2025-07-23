@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { listService } from "../services/api/lists";
 import type { TaskList } from "../types";
+import { set } from "date-fns";
 
 interface UseListsOptions {
   autoFetch?: boolean;
@@ -102,5 +103,6 @@ export function useLists(options: UseListsOptions = {}) {
     updateList,
     deleteList,
     getList,
+    setLists,
   };
 }

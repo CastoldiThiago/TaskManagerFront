@@ -27,6 +27,8 @@ import { useAuth } from "../context/AuthContext"
 import { useTitle } from "../context/TitleContext"
 import { useTaskContext } from "../context/TaskContext"
 import { Button } from "@mui/material"
+import { Trash } from "lucide-react"
+import DeleteItemModal from "./DeleteItemModal"
 
 const drawerWidth = 240
 
@@ -59,14 +61,18 @@ interface ResponsiveSidebarProps {
 }
 
 export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) {
+  // Estado para modal de confirmación de borrado de lista
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [listToDelete, setListToDelete] = React.useState<{id: string, name: string} | null>(null);
   const theme = useTheme()
   const location = useLocation()
   const [open, setOpen] = React.useState(false)
   const [isClosing, setIsClosing] = React.useState(false)
   const { logout } = useAuth()
   const { title, setTitle } = useTitle()
-  const {lists, createList} = useTaskContext()
+  const {lists, createList, deleteList, fetchLists} = useTaskContext()
   const navigate = useNavigate()
+  const [isOverItem, setIsOverItem] = React.useState<string|null>()
 
   const handleAddList = async () => {
     try {
@@ -77,13 +83,34 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
       alert("No se pudo crear la lista.")
     }
   }
-  
-  React.useEffect(() => {
-    const storedUserName = localStorage.getItem("name")
-    if (storedUserName) {
-      setTitle(`Bienvenido! ${storedUserName}`)
+
+  // Abre el modal y setea la lista a borrar
+  const handleAskDeleteList = (list: {id: string, name: string}) => {
+    setListToDelete(list);
+    setDeleteModalOpen(true);
+  };
+
+  // Confirma el borrado
+  const handleDeleteList = async () => {
+    if (!listToDelete) return;
+    try {
+      await deleteList(listToDelete.id);
+      await fetchLists();
+      const remainingLists = lists?.filter(l => l.id !== listToDelete.id);
+      if (remainingLists.length > 0) {
+        if (location.pathname === `/home/task-list/${listToDelete.id}`) {
+          navigate(`/home/task-list/${remainingLists[0].id}`);
+        }
+      } else {
+        navigate("/home/all-my-tasks");
+      }
+    } catch (error) {
+      console.error("Error deleting list:", error);
+    } finally {
+      setDeleteModalOpen(false);
+      setListToDelete(null);
     }
-  }, [])
+  };
 
   const handleDrawerOpen = () => {
     if (!isClosing) setOpen(true)
@@ -345,7 +372,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           >
             <List>
               {lists.map((list) => (
-                <ListItem key={list.id} disablePadding>
+                <ListItem 
+                  key={list.id} 
+                  disablePadding
+                  onMouseEnter={() => setIsOverItem(list.id)}
+                  onMouseLeave={() => setIsOverItem(list.id === isOverItem ? null : isOverItem)}
+                >
                   <ListItemButton
                     component={NavLink}
                     to={`/home/task-list/${list.id}`}
@@ -363,10 +395,23 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                     <ListItemIcon>
                       <ListAltIcon />
                     </ListItemIcon>
-                    <ListItemText primary={list.name} />
+                    <ListItemText primary={list.name}/>
+                    {(isOverItem == list.id || (location.pathname === `/home/task-list/${list.id}`)) && (
+                      <IconButton onClick={e => {e.preventDefault(); e.stopPropagation(); handleAskDeleteList(list);}}>
+                        <Trash size={16}/>
+                      </IconButton>
+                    )}
                   </ListItemButton>
                 </ListItem>
               ))}
+      {/* Modal de confirmación para borrar lista */}
+      <DeleteItemModal
+        open={deleteModalOpen}
+        onClose={() => { setDeleteModalOpen(false); setListToDelete(null); }}
+        onConfirm={handleDeleteList}
+        type="list"
+        name={listToDelete?.name || ""}
+      />
             </List>
           </Box>
           {/* Botón fijo abajo */}

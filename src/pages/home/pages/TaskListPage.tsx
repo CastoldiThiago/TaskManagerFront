@@ -5,7 +5,7 @@ import EditIcon from "@mui/icons-material/Edit"
 import SaveIcon from "@mui/icons-material/Save"
 import TaskItem from "../../../components/TaskItem"
 import { useTaskContext } from "../../../context/TaskContext"
-import { Task, TaskListComplete } from "../../../types"
+import { Task, TaskList } from "../../../types"
 import DropdownTasks from "../../../components/DropdownTasks"
 import { useTitle } from "../../../context/TitleContext"
 import AddTask from "../../../components/AddTask"
@@ -19,15 +19,15 @@ const orderOptions = [
   { value: "title", label: "Title" },
 ]
 
-const TaskList: React.FC = () => {
+const TaskListPage: React.FC = () => {
   const { id } = useParams()
-  const { updateList, getList, error, deleteList, fetchLists, deleteTask, fetchTasks} = useTaskContext()
+  const { updateList, error, deleteList, fetchLists, deleteTask, lists, getTasksForList} = useTaskContext()
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   // Estado local para la lista actual
-  const [list, setList] = useState<TaskListComplete>()
-  const [listTasks, setListTasks] = useState<Task[]>(list?.tasks || [])
+  const [list, setList] = useState<TaskList>()
+  const [listTasks, setListTasks] = useState<Task[]>([])
   const [name, setName] = useState(list?.name || "")
   const [description, setDescription] = useState(list?.description || "")
   const [editingName, setEditingName] = useState(false);
@@ -72,26 +72,35 @@ const TaskList: React.FC = () => {
   }
 
   // carga la lista y sus tareas
-  const fetchList = async () => {
+  const loadList = async () => {
       setLoading(true)
       try {
-        if (!id) return
-        const fetchedList = await getList(id)
-        if (fetchedList) {
-          setList(fetchedList)
-          setName(fetchedList.name || "")
-          setDescription(fetchedList.description || "")
-          setListTasks(fetchedList.tasks || [])
+        const currentList = lists.find((l) => l.id == id)
+        if (currentList) {
+          setList(currentList)
+          setName(currentList.name || "")
+          setDescription(currentList.description || "")
+          const tasks = await getTasksForList(currentList.id)
+          setListTasks(tasks)
         }
+      } catch (error) {
+        console.error("Error loading list:", error)
+        setList(undefined)
+        setListTasks([])
+        setName("")
+        setDescription("")
+
       } finally {
         setLoading(false)
       }
     }
   // Cargar la lista y sus tareas al montar o cambiar id
   useEffect(() => {
-    fetchList()
+    console.log("Cargando lista con id:", id)
+    fetchLists()
+    loadList()
     setTitle("My Lists")
-  }, [id, getList])
+  }, [id])
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
@@ -111,7 +120,6 @@ const TaskList: React.FC = () => {
 
   const handleSave = async () => {
     await updateList(list.id, { name, description })
-    fetchList() // Refrescar la lista después de guardar
   }
 
 
@@ -127,6 +135,18 @@ const TaskList: React.FC = () => {
   const handleTaskCreated = (task: Task) => {
     if (task.listId == list.id) {
     setListTasks(prev => [...prev, task])
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault()
+      setEditingName(false)
+      handleSave()
+    } else if (e.key === "Escape") {
+      e.preventDefault()
+      setEditingName(false)
+      setName(list.name || "")
     }
   }
 
@@ -151,7 +171,9 @@ const TaskList: React.FC = () => {
               setEditingName(false);
               handleSave();
             }}
+            onKeyDown={handleKeyDown}
             autoFocus
+            onFocus={(e) => e.target.select()}
             variant="standard"
             fullWidth
             inputProps={{
@@ -297,4 +319,4 @@ const TaskList: React.FC = () => {
   )
 }
 
-export default TaskList
+export default TaskListPage
