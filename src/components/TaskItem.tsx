@@ -6,7 +6,7 @@ import CalendarIcon from "@mui/icons-material/CalendarToday"
 import ListIcon from "@mui/icons-material/FormatListBulleted"
 import { format, set } from "date-fns"
 import { es } from "date-fns/locale"
-import { DeleteIcon, Trash } from "lucide-react"
+import { Trash } from "lucide-react"
 import DeleteItemModal from "./DeleteItemModal"
 
 interface TaskItemProps {

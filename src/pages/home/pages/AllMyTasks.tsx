@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react"
 import {
   Box,
-  Typography,
   Select,
   MenuItem,
   FormControl,

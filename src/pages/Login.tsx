@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import config from '../config'
 import { useAuth } from '../context/AuthContext';
@@ -12,7 +11,6 @@ import {
     Divider,
     Link,
     Avatar,
-    Container,
     Alert,
     SnackbarCloseReason,
     Snackbar,

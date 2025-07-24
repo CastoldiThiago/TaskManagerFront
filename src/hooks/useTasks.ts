@@ -12,8 +12,6 @@ export function useTasks(options: UseTasksOptions = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [filter, setFilter] = useState<TaskFilter | undefined>(options.initialFilter);
-  
-  const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   function setTasks(
     value: Task[] | ((prev: Task[]) => Task[])

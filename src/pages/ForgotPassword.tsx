@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Box, TextField, Button, Typography, Alert, Avatar, Divider, IconButton } from '@mui/material';
+import { Box, TextField, Button, Typography, Alert, Avatar, Divider } from '@mui/material';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { useNavigate } from 'react-router-dom';
 

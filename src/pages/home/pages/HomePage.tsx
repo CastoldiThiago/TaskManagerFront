@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Stack,
 } from '@mui/material';
-import { format, isToday, isFuture, set } from 'date-fns';
+import { format, isFuture, set } from 'date-fns';
 import { useTaskContext } from '../../../context/TaskContext';
 import { useTitle } from '../../../context/TitleContext';
 import { useNavigate } from 'react-router-dom';

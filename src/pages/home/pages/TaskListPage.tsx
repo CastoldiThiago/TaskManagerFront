@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { Box, Typography, TextField, IconButton, Stack, Divider, Alert, FormControl, InputLabel, Select, MenuItem, CircularProgress } from "@mui/material"
-import EditIcon from "@mui/icons-material/Edit"
-import SaveIcon from "@mui/icons-material/Save"
 import TaskItem from "../../../components/TaskItem"
 import { useTaskContext } from "../../../context/TaskContext"
 import { Task, TaskList } from "../../../types"
@@ -12,7 +10,7 @@ import AddTask from "../../../components/AddTask"
 import EditTask from "../../../components/EditTask"
 import { set } from "date-fns"
 import DeleteItemModal from "../../../components/DeleteItemModal"
-import { DeleteIcon, TrashIcon } from "lucide-react"
+import { TrashIcon } from "lucide-react"
 
 const orderOptions = [
   { value: "dueDate", label: "Due date" },
