@@ -75,7 +75,7 @@ const HomePage = () => {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: 4, overflowY: 'auto', height: '100vh' }}>
       <Typography variant="h4" gutterBottom>
         Welcome! {name ? name : ""}
       </Typography>
@@ -129,16 +129,15 @@ const HomePage = () => {
         </Card>
 
         {/* Overdue Tasks Card */}
-        <Card sx={{ flex: 1, minWidth: 0, border: '1px solid #f44336' }}>
+        <Card sx={{ flex: 1, minWidth: 0 }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom color="error">
+            <Typography variant="h6" gutterBottom>
               Overdue Tasks
             </Typography>
             {overdueTasks.length > 0 ? (
               overdueTasks.map(task => (
-                console.log("Overdue task:", task),
                 <Box key={task.id} sx={{ mt: 1 }}>
-                  <Typography variant="body2" color="error">
+                  <Typography variant="body2">
                     {task.title} – {format(new Date(task.dueDate!), 'MM/dd/yyyy')}
                   </Typography>
                 </Box>
@@ -146,7 +145,7 @@ const HomePage = () => {
             ) : (
               <Typography variant="body2">No overdue tasks</Typography>
             )}
-            <Button variant="outlined" color="error" size="small" onClick={()=> navigate("/home/all-my-tasks")} sx={{ mt: 2 }}>
+            <Button variant="outlined" size="small" onClick={()=> navigate("/home/all-my-tasks")} sx={{ mt: 2 }}>
               View All Tasks
             </Button>
           </CardContent>

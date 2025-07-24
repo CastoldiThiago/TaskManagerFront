@@ -192,7 +192,7 @@ export default function ToDo() {
           direction="row"
           spacing={2}
           alignItems="flex-start"
-          sx={{ width: "100%", flex: 1 }}
+          sx={{ width: "100%", flex: 1, overflowX: "auto" }}
         >
           {statusPanels.map((panel) => (
             <Droppable droppableId={panel.key} key={panel.key}>
@@ -202,7 +202,7 @@ export default function ToDo() {
                   {...provided.droppableProps}
                   sx={{
                     flex: 1,
-                    minWidth: 0,
+                    minWidth: 250,
                     height: { xs: 400, sm: "calc(100vh - 180px)" },
                     display: "flex",
                     flexDirection: "column",

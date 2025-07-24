@@ -44,7 +44,7 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage =
       onClick={handleClick}
       sx={{
         mb: 2,
-        p: 2,
+        p: { xs: 1, sm: 2 },
         display: "flex",
         alignItems: "center",
         borderRadius: 2,
@@ -53,6 +53,8 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage =
         opacity: task.status === "DONE" ? 0.75 : 1,
         cursor: "pointer",
         transition: "background 0.2s, box-shadow 0.2s",
+        minWidth: 0,
+        width: '100%',
         "&:hover": {
           backgroundColor: "secondary.light",
           boxShadow: "0 4px 16px rgba(0,0,0,0.13)",
@@ -80,17 +82,24 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage =
             textDecoration: task.status === "DONE" ? "line-through" : "none",
             color: "#fff",
             fontWeight: 500,
-            fontSize: 18,
-            whiteSpace: "nowrap",
+            fontSize: { xs: 15, sm: 18 },
+            whiteSpace: { xs: 'normal', sm: 'nowrap' },
             overflow: "hidden",
             textOverflow: "ellipsis",
+            wordBreak: 'break-word',
           }}
         >
           {task.title}
         </Typography>
 
         {(task.dueDate || task.listId) && (
-          <Box sx={{ display: "flex", gap: 2, mt: 0.5 }}>
+          <Box sx={{
+            display: "flex",
+            gap: { xs: 1, sm: 2 },
+            mt: 0.5,
+            flexWrap: { xs: 'wrap', sm: 'nowrap' },
+            alignItems: 'center',
+          }}>
             {task.listId && (
               <Typography
                 variant="caption"
@@ -98,7 +107,11 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage =
                   display: "flex",
                   alignItems: "center",
                   color: "#bdbdbd",
-                  fontSize: 13,
+                  fontSize: { xs: 12, sm: 13 },
+                  maxWidth: { xs: 120, sm: 'none' },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: { xs: 'normal', sm: 'nowrap' },
                 }}
               >
                 <ListIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
@@ -112,12 +125,15 @@ export default function TaskItem({ task, onOpenModal, hideCheckbox, inTodoPage =
                   display: "flex",
                   alignItems: "center",
                   color: "#bdbdbd",
-                  fontSize: 13,
+                  fontSize: { xs: 12, sm: 13 },
+                  maxWidth: { xs: 110, sm: 'none' },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: { xs: 'normal', sm: 'nowrap' },
                 }}
               >
                 <CalendarIcon fontSize="small" sx={{ mr: 0.5, fontSize: "1rem" }} />
-                {inTodoPage ? format(new Date(task.dueDate), "dd/MM/yyyy", { locale: es }) :
-                              format(new Date(task.dueDate), "PPP", { locale: es })}
+                {format(new Date(task.dueDate), "dd/MM/yyyy", { locale: es })}
               </Typography>
             )}
           </Box>

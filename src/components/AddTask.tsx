@@ -35,8 +35,7 @@ export default function AddTask({ isInMyDay, handleTaskCreated, taskList}: AddTa
   const [taskName, setTaskName] = useState("")
   const [selectedList, setSelectedList] = useState<TaskList | null>(taskList? taskList : null)
   const [dueDate, setDueDate] = useState<Date | null>(null)
-  const {lists} = useLists()
-  const {createTask} = useTaskContext()
+  const {createTask, lists} = useTaskContext()
 
   // Popover states
   const [listAnchorEl, setListAnchorEl] = useState<HTMLDivElement | null>(null)
@@ -52,6 +51,7 @@ export default function AddTask({ isInMyDay, handleTaskCreated, taskList}: AddTa
 
   // Focus input when expanded
   useEffect(() => {
+
     if (isExpanded && inputRef.current) {
       inputRef.current.focus()
     }

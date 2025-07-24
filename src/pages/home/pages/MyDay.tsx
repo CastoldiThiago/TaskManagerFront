@@ -31,7 +31,6 @@ export default function MyDayPage() {
   }
 
   useEffect(() => {
-    console.log("Cargando tareas del día")
     setTasks([])
     setTitle("My Day")
     fetchMyDayTasks()

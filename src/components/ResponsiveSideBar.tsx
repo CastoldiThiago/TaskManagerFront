@@ -14,6 +14,7 @@ import AppBar from "@mui/material/AppBar"
 import Toolbar from "@mui/material/Toolbar"
 import CssBaseline from "@mui/material/CssBaseline"
 import MenuIcon from "@mui/icons-material/Menu"
+import HomeIcon from "@mui/icons-material/Home"
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft"
 import ChevronRightIcon from "@mui/icons-material/ChevronRight"
 import TodayIcon from "@mui/icons-material/Today"
@@ -102,7 +103,9 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           navigate(`/home/task-list/${remainingLists[0].id}`);
         }
       } else {
-        navigate("/home/all-my-tasks");
+        if (location.pathname === `/home/task-list/${listToDelete.id}`){
+          navigate("/home/all-my-tasks");
+        }
       }
     } catch (error) {
       console.error("Error deleting list:", error);
@@ -155,6 +158,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
         }}
       >
         <Toolbar>
+          {/* Botón menú hamburguesa solo mobile */}
           <IconButton
             color="inherit"
             aria-label="open drawer"
@@ -163,6 +167,16 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
             sx={{ mr: 2, display: { sm: "none" } }}
           >
             <MenuIcon />
+          </IconButton>
+          {/* Botón Home solo mobile */}
+          <IconButton
+            color="inherit"
+            aria-label="go home"
+            edge="start"
+            onClick={() => navigate("/home")}
+            sx={{ mr: 2, display: { xs: "inline-flex", sm: "none" } }}
+          >
+            <HomeIcon />
           </IconButton>
           <Typography variant="h5" noWrap component="div" sx={{ flexGrow: 1, textAlign: "start" }}>
             {title}
@@ -216,6 +230,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                   component={NavLink}
                   to={item.path}
                   selected={isActive(item.path)}
+                  onClick={handleDrawerClose}
                   sx={{
                     "&.active, &:hover, &[aria-selected='true']": {
                       backgroundColor: "rgba(0, 0, 0, 0.08)",
@@ -253,6 +268,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
                     component={NavLink}
                     to={`/home/task-list/${list.id}`}
                     selected={location.pathname === `/home/task-list/${list.id}`}
+                    onClick={handleDrawerClose}
                     sx={{
                       "&.active, &:hover, &[aria-selected='true']": {
                         backgroundColor: "rgba(0, 0, 0, 0.08)",

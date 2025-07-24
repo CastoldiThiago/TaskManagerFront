@@ -41,17 +41,21 @@ apiClient.interceptors.response.use(
 
     // Si es un error 401 y no intentamos ya refrescar
     if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-      const newToken = await refreshAccessToken()
+      originalRequest._retry = true;
+      const newToken = await refreshAccessToken();
 
       if (newToken) {
         // Reintenta la petición original con el nuevo token
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
-        return apiClient(originalRequest)
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
       } else {
-        // Si no se puede refrescar, redirige al login
-        localStorage.removeItem("authToken")
-        window.location.href = "/login"
+        // Solo redirige si ya había un token guardado (usuario autenticado)
+        if (localStorage.getItem("authToken")) {
+          localStorage.removeItem("authToken");
+          window.location.href = "/";
+        }
+        // Si no hay token previo, deja que el componente maneje el error
+        // (por ejemplo, en el login inicial)
       }
     }
 

@@ -52,9 +52,19 @@ const TaskListPage: React.FC = () => {
   const handleDelete = async () => {
     if (!id) return
     try {
+      console.log("Lists before deletion:", lists)
       await deleteList(id)
-      await fetchLists() // Refrescar la lista de listas
-      navigate("/home")
+      await fetchLists()
+      const remainingLists = lists.filter(l => l.id != id);
+      if (remainingLists.length > 0) {
+        if (location.pathname === `/home/task-list/${id}`) {
+          navigate(`/home/task-list/${remainingLists[0].id}`);
+        }
+      } else {
+        if (location.pathname === `/home/task-list/${id}`){
+          navigate("/home/all-my-tasks");
+        }
+      }
     } catch (error) {
       console.error("Error deleting list:", error)
     } finally {
@@ -96,7 +106,6 @@ const TaskListPage: React.FC = () => {
     }
   // Cargar la lista y sus tareas al montar o cambiar id
   useEffect(() => {
-    console.log("Cargando lista con id:", id)
     fetchLists()
     loadList()
     setTitle("My Lists")
