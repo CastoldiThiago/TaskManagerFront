@@ -4,7 +4,6 @@ import './App.css';
 import Login from './pages/Login';
 import Home from './pages/home/Home';
 import ProtectedRoute from './components/ProtectedRoute';
-import OAuthSuccess from './pages/OAuthSuccess';
 import { AuthProvider } from './context/AuthContext';
 import VerifyEmail from './pages/VerifyEmail';
 import { CssBaseline, ThemeProvider, createTheme} from '@mui/material';
@@ -37,7 +36,6 @@ function App() {
           <CssBaseline />
           <Routes>
             <Route path="/" element={<Login />} />
-            <Route path="/oauth-success" element={<OAuthSuccess />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
