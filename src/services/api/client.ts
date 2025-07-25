@@ -1,8 +1,9 @@
 // Cliente API base para hacer peticiones HTTP
 import axios, { AxiosError } from "axios"
+import config from "../../config"
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: config.backendUrl + "/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,7 +22,7 @@ apiClient.interceptors.request.use((config) => {
 // Función para refrescar el token
 const refreshAccessToken = async (): Promise<string | null> => {
   try {
-    const res = await axios.post("http://localhost:8080/api/auth/refresh", {}, {
+    const res = await axios.post(`${config.backendUrl}/api/auth/refresh`, {}, {
       withCredentials: true,
     })
     const newToken = res.data.accessToken

@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Box, TextField, Button, Typography, Alert, Avatar, Divider } from '@mui/material';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { useNavigate } from 'react-router-dom';
+import config from '../config';
 
 interface FormData {
   email: string;
@@ -19,7 +20,7 @@ const ForgotPassword: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await fetch("http://localhost:8080/auth/forgot-password", {
+      const response = await fetch(`${config.backendUrl}/api/auth/forgot-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: data.email }),

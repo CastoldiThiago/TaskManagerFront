@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Box, TextField, Button, Typography, Alert, Avatar, Divider } from "@mui/material";
 import LockResetIcon from '@mui/icons-material/LockReset';
 import { useForm } from "react-hook-form";
+import config from "../config";
 
 interface FormData {
   newPassword: string;
@@ -29,7 +30,7 @@ const ResetPassword: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/auth/reset-password", {
+      const response = await fetch(`${config.backendUrl}/api/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: data.newPassword }),

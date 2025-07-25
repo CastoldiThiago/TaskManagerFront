@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import config from '../config';
 
 function parseJwt(token: string): any {
   try {
@@ -64,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Pedir al backend que elimine la cookie
     try {
-      await fetch('http://localhost:8080/api/auth/logout', {
+      await fetch(`${config.backendUrl}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -75,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
-      const res = await fetch('http://localhost:8080/api/auth/refresh', {
+      const res = await fetch(`${config.backendUrl}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include', // 🔥 enviar cookie refreshToken
       });
