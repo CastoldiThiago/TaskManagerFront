@@ -105,7 +105,6 @@ export default function AddTask({ isInMyDay, handleTaskCreated, taskList}: AddTa
 
       createTask(newTask)
         .then((task) => {
-          console.log("Task created successfully:", task)
           resetForm()
         })
         .catch((error) => {

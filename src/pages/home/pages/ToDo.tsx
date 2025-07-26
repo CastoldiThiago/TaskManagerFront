@@ -30,15 +30,18 @@ const orderOptions = [
 ]
 
 export default function ToDo() {
-  const { tasks, lists, changeStateTask, fetchTasks, setTasks, isLoading, deleteTask } = useTaskContext()
+  const { tasks, lists, changeStateTask, fetchTasks, setTasks, deleteTask } = useTaskContext()
   const [selectedList, setSelectedList] = useState<TaskList>()
+  const [loadingInitial, setLoadingInitial] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const {setTitle} = useTitle();
   const [orderBy, setOrderBy] = useState<"custom" | "dueDate" | "title">("custom")
 
   useEffect(() => {
+    setLoadingInitial(true)
     fetchTasks()
+      .finally(() => setLoadingInitial(false))
     setTitle("To Do Board")
     // Si la lista seleccionada fue borrada, limpiar filtro
     if (selectedList && !lists.find(l => l.id === selectedList.id)) {
@@ -150,7 +153,7 @@ export default function ToDo() {
       }
     }
   }
-  if (isLoading) return (
+  if (loadingInitial) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
       <CircularProgress size={40} color="secondary" />
     </Box>)

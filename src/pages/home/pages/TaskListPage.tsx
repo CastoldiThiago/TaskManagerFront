@@ -309,7 +309,7 @@ const TaskListPage: React.FC = () => {
               }}
             >
               <Box sx={{ margin: "0 auto" }}>
-                <AddTask isInMyDay handleTaskCreated={handleTaskCreated} taskList={list} />
+                <AddTask handleTaskCreated={handleTaskCreated} taskList={list} />
               </Box>
             </Box>
             {/* EditTask modal */}

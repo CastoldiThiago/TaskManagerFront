@@ -34,6 +34,7 @@ const Login: React.FC = () => {
     const [open, setOpen] = React.useState(false);
     const [registerMessage, setRegisterMessage] = React.useState<string | null>(null); 
     const [isRegistering, setIsRegistering] = React.useState(false);
+    const [isLoggingIn, setIsLoggingIn] = React.useState(false);
     const navigate = useNavigate();
     const { isAuthenticated, token, login } = useAuth();
 
@@ -59,7 +60,7 @@ const Login: React.FC = () => {
     
     const onSubmit = async (data: FormData) => {
         setErrorMessage(null); // Clear global error messages
-
+        setIsLoggingIn(true);
         try {
             if (isLoginMode) {
                 // Login
@@ -92,6 +93,7 @@ const Login: React.FC = () => {
             }
         } catch (error: any) {
             setIsRegistering(false);
+            setIsLoggingIn(false);
             setRegisterMessage(null);
             if (error.response) {
                 const { status, data } = error.response;
@@ -139,6 +141,11 @@ const Login: React.FC = () => {
 
     const handleLoginSuccess = async (credentialResponse: any) => {
         const idToken = credentialResponse.credential;
+        setIsLoggingIn(true);
+        if (!idToken) {
+            setErrorMessage("Google login failed. Please try again.");
+            return;
+        }
 
         try {
             const res = await fetch(`${config.backendUrl}/api/auth/google`, {
@@ -301,10 +308,10 @@ const Login: React.FC = () => {
                     sx={{ marginTop: 2 }}
                     disabled={isRegistering}
                 >
-                    {isRegistering ? (
+                    {(isRegistering || isLoggingIn) ? (
                         <>
                             <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <span style={{ marginRight: 8 }}>Creating account...</span>
+                                <span style={{ marginRight: 8 }}>{isLoginMode ? 'logging in...' : 'Creating account...'}</span>
                                 <span className="MuiCircularProgress-root MuiCircularProgress-colorPrimary" style={{ width: 20, height: 20 }}>
                                     <svg className="MuiCircularProgress-svg" viewBox="22 22 44 44">
                                         <circle className="MuiCircularProgress-circle" cx="44" cy="44" r="20.2" fill="none" strokeWidth="3.6" />

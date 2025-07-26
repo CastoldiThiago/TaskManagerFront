@@ -64,7 +64,7 @@ export default function MyDayPage() {
       </Box>
 
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16, height: '100%' }}>
           <CircularProgress />
         </Box>
       )   :  (
