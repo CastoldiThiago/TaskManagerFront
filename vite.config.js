@@ -10,14 +10,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    proxy: {
-      "/api": {
-        target: import.meta.env.VITE_BACKEND_URL || 'https://taskmanagerback-rz32.onrender.com',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-  },
   base: './',
 })
