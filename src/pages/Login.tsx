@@ -350,6 +350,7 @@ const Login: React.FC = () => {
                     onError={() => {
                         console.log('Google login failed');
                     }}
+                    width={'100%'}
                 />
             )}
             {/* Mensaje de registro */}
