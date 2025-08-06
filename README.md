@@ -30,6 +30,16 @@ Note: This project is meant to be viewed online. Running it locally requires set
     - Axios (for API calls)
     - CSS Modules
 
+### Backend Integration
+
+This frontend application connects to a backend built with Java Spring Boot. The backend includes:
+
+    - JWT Authentication for secure user access
+    - PostgreSQL as the database management system
+    - Dockerized deployment for easy setup and scalability
+    - Email notifications functionality
+    - User registration and login via Google OAuth2
+
 ### About Me
 
 Hi, I'm Thiago Castoldi, the creator of this project. I build apps to solve real problems and practice modern web development technologies. Feel free to check out my other projects!
