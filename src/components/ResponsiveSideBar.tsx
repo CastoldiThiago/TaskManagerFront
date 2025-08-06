@@ -184,7 +184,7 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           <IconButton color="inherit" onClick={handleLogout} edge="end">
             <LogoutIcon />
             <Typography variant="body2" sx={{ ml: 1, display: { xs: "none", sm: "block" } }}>
-              Cerrar sesión
+              Log out
             </Typography>
           </IconButton>
         </Toolbar>
