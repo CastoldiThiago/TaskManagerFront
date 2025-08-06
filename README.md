@@ -1,12 +1,35 @@
-# React + Vite
+### TaskManager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend application for TaskManager, a personal project I developed to manage tasks efficiently.
 
-Currently, two official plugins are available:
+### About the Project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+TaskManager is a simple, user-friendly task management app built with React and Vite. It features:
 
-## Expanding the ESLint configuration
+Creating, editing, and deleting tasks
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Organizing tasks by lists or categories
+
+Responsive design for both desktop and mobile
+
+### How to Use
+
+This project is already deployed and running live. You don’t need to clone or run it locally.
+
+To try it out, simply visit the live site here:
+
+https://taskmanagerfront-7cym.onrender.com/
+
+Note: This project is meant to be viewed online. Running it locally requires setting up the backend API and environment, which is beyond the scope of this demo.
+
+### Technologies Used
+
+    - React
+    - Vite
+    - React Router
+    - Axios (for API calls)
+    - CSS Modules
+
+### About Me
+
+Hi, I'm Thiago Castoldi, the creator of this project. I build apps to solve real problems and practice modern web development technologies. Feel free to check out my other projects!
