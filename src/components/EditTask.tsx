@@ -73,7 +73,6 @@ export default function EditTask({
       setMovedToMyDay(!!task.movedToMyDay)
       setSelectedList(lists.find(l => l.id === task.listId) ?? null)
     }
-    // eslint-disable-next-line
   }, [task, lists])
 
   if (!task) return null

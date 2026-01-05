@@ -25,7 +25,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     const res = await axios.post(`${config.backendUrl}/api/auth/refresh`, {}, {
       withCredentials: true,
     })
-    const newToken = res.data.accessToken
+    const newToken = res.data.jwt
     localStorage.setItem("authToken", newToken)
     return newToken
   } catch (error) {
@@ -50,13 +50,17 @@ apiClient.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(originalRequest);
       } else {
-        // Solo redirige si ya había un token guardado (usuario autenticado)
-        if (localStorage.getItem("authToken")) {
-          localStorage.removeItem("authToken");
+        // El refresh falló, limpiar auth y redirigir
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("name");
+        
+        // Disparar evento personalizado para que AuthContext maneje el logout
+        window.dispatchEvent(new Event('auth:token-expired'));
+        
+        // Redirigir al login
+        if (window.location.pathname !== '/') {
           window.location.href = "/";
         }
-        // Si no hay token previo, deja que el componente maneje el error
-        // (por ejemplo, en el login inicial)
       }
     }
 

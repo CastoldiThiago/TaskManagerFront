@@ -344,7 +344,7 @@ const Login: React.FC = () => {
 
             {/* Divider and Google button */}
             <Divider sx={{ marginY: 2 }} />
-            {isLoginMode && (
+            {/* {isLoginMode && (
                 <GoogleLogin
                     onSuccess={handleLoginSuccess}
                     onError={() => {
@@ -352,7 +352,7 @@ const Login: React.FC = () => {
                     }}
                     width={'100%'}
                 />
-            )}
+            )} */}
             {/* Mensaje de registro */}
             {registerMessage && (
                 <Alert severity="info" sx={{ mt: 2 }}>{registerMessage}</Alert>

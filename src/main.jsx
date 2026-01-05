@@ -10,7 +10,7 @@ import "@fontsource/roboto/400.css"
 import "@fontsource/roboto/500.css"
 import "@fontsource/roboto/700.css"
 
-const CLIENT_ID = '599185517164-ah43i80rge5549amq35qj0rb9gm93djr.apps.googleusercontent.com';
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 
 createRoot(document.getElementById('root')).render(
