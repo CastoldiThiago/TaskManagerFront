@@ -35,7 +35,7 @@ const orderOptions = [
 
 export default function AllMyTasks() {
   const { tasks, lists, fetchTasks, isLoading, deleteTask } = useTaskContext()
-  const [filter, setFilter] = useState<string>("TODO")
+  const [filter, setFilter] = useState<string>("")
   const [order, setOrder] = useState<string>("dueDate")
   const [search, setSearch] = useState("")
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -99,8 +99,7 @@ export default function AllMyTasks() {
   }
 
   const handleDeleteTask = (task: Task) => {
-    deleteTask(task.id),
-    fetchTasks()
+    deleteTask(task.id)
   }
 
   return (

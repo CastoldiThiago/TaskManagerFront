@@ -19,7 +19,7 @@ const orderOptions = [
 
 const TaskListPage: React.FC = () => {
   const { id } = useParams()
-  const { updateList, error, deleteList, fetchLists, deleteTask, lists, getTasksForList} = useTaskContext()
+  const { updateList, error, deleteList, fetchLists, deleteTask, lists, getTasksForList, tasks } = useTaskContext()
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -108,6 +108,14 @@ const TaskListPage: React.FC = () => {
     loadList()
     setTitle("My Lists")
   }, [id])
+
+  // Sincronizar listTasks con las tareas del contexto que pertenecen a esta lista
+  useEffect(() => {
+    if (list?.id) {
+      const filteredTasks = tasks.filter(task => task.listId === list.id)
+      setListTasks(filteredTasks)
+    }
+  }, [tasks, list?.id])
 
   if (loading) return (
     <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>

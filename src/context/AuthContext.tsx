@@ -29,7 +29,6 @@ interface AuthContextProps {
   isAuthenticated: boolean;
   logout: () => void;
   login: (jwt: string) => void;
-  refresh: () => Promise<string | null>;
   token: string | null;
   name: string | null;
 }
@@ -74,52 +73,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const refreshAccessToken = async (): Promise<string | null> => {
-    try {
-      const res = await fetch(`${config.backendUrl}/api/auth/refresh`, {
-        method: 'POST',
-        credentials: 'include', // 🔥 enviar cookie refreshToken
-      });
-
-      if (!res.ok) throw new Error('Refresh falló');
-
-      const data = await res.json();
-      const newToken = data.accessToken;
-
-      setToken(newToken);
-      localStorage.setItem('authToken', newToken);
-
-      const decoded = parseJwt(newToken);
-      if (decoded?.name) {
-        setName(decoded.name);
-        localStorage.setItem('name', decoded.name);
-      }
-
-      return newToken;
-    } catch (err) {
-      console.error('Error al refrescar token:', err);
-      logout();
-      return null;
-    }
-  };
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
+  const storedToken = localStorage.getItem('authToken');
 
-    const checkToken = async () => {
-      if (storedToken && !isTokenExpired(storedToken)) {
-        setToken(storedToken);
-        const decoded = parseJwt(storedToken);
-        if (decoded?.name) {
-          setName(decoded.name);
-        }
-      } else {
-        await refreshAccessToken();
-      }
-    };
+  if (storedToken && !isTokenExpired(storedToken)) {
+    setToken(storedToken);
+    const decoded = parseJwt(storedToken);
+    if (decoded?.name) {
+      setName(decoded.name);
+    }
+  } else {
+    setToken(null);
+    setName(null);
+  }
 
-    checkToken();
-  }, []);
+  const handleTokenExpired = () => {
+    setToken(null);
+    setName(null);
+  };
+
+  window.addEventListener('auth:token-expired', handleTokenExpired);
+
+  return () => {
+    window.removeEventListener('auth:token-expired', handleTokenExpired);
+  };
+}, []);
 
   return (
     <AuthContext.Provider
@@ -127,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         logout,
         login,
-        refresh: refreshAccessToken,
         token,
         name,
       }}

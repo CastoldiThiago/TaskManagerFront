@@ -60,7 +60,6 @@ export default function ToDo() {
 
   const handleDeleteTask = async (task: Task) => {
     await deleteTask(task.id)
-    await fetchTasks()
   }
 
   // Filtrar tareas por lista seleccionada
