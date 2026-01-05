@@ -1,12 +1,33 @@
-# React + Vite
+### TaskManager Frontend
+This is the frontend for TaskManager, a moderately complex personal task management web application.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### Overview
+TaskManager allows users to organize and manage their daily tasks with the following main features:
 
-Currently, two official plugins are available:
+    - ToDo with drag & drop: Easily reorder tasks by dragging and dropping them.
+    - My Day: A focused view that shows tasks planned for today.
+    - All Tasks: A comprehensive list of all your tasks.
+    - Task Lists: Organize tasks into customizable lists for better categorization.
+    - Google Login
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The frontend is built using React with Vite for fast development and optimized builds.
 
-## Expanding the ESLint configuration
+### Deployment
+The app is deployed and accessible via the following URL:
+[Link to web](https://taskmanagerfront-7cym.onrender.com/)
 
-If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Please note, this frontend connects to a backend API and cannot be run independently without it.
+
+### Backend Connection
+The backend is a Java Spring Boot application featuring:
+
+    - JWT authentication
+    - PostgreSQL database
+    - Docker deployment
+    - Email notifications
+    - Google OAuth registration
+
+The backend repository and deployment URL are available separately.
+
+### How to Use
+Simply access the deployed URL and sign in to start managing your tasks with a clean, user-friendly interface.
