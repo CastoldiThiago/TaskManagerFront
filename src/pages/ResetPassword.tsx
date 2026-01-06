@@ -30,7 +30,7 @@ const ResetPassword: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${config.backendUrl}/api/auth/reset-password`, {
+      const response = await fetch(`${config.backendUrl}/auth/reset-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, newPassword: data.newPassword }),
