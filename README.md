@@ -35,8 +35,9 @@ El proyecto implementa un sistema completo de gestión de tareas con caracterís
 
 ### 🔐 Autenticación y Seguridad
 - 🔑 **Login JWT**:  Sistema de autenticación seguro con tokens JWT
-- 👤 **Gestión de Usuarios**:  Sistema completo de registro e inicio de sesión
+- 👤 **Gestión de Usuarios**:  Sistema completo de registro e inicio de sesión con Email y Password
 - 🔒 **Rutas Protegidas**: Acceso seguro a funcionalidades según autenticación
+- 🔥 **Google OAuth**: La funcionalidad de login con Google está implementada en el código, pero actualmente deshabilitada debido a los costos
 
 ### 🎨 Interfaz de Usuario
 - 💎 **Material-UI**: Diseño moderno y responsivo con componentes de Material-UI
