@@ -22,14 +22,16 @@ import AssignmentIcon from "@mui/icons-material/Assignment"
 import CheckBoxIcon from "@mui/icons-material/CheckBox"
 import ListAltIcon from "@mui/icons-material/ListAlt"
 import LogoutIcon from "@mui/icons-material/Logout"
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined"
 import AddIcon from "@mui/icons-material/Add"
 import { NavLink, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import { useTitle } from "../context/TitleContext"
 import { useTaskContext } from "../context/TaskContext"
-import { Button } from "@mui/material"
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material"
 import { Trash } from "lucide-react"
 import DeleteItemModal from "./DeleteItemModal"
+import { accountService } from "../services/api/account"
 
 const drawerWidth = 240
 
@@ -63,17 +65,21 @@ interface ResponsiveSidebarProps {
 
 export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) {
   // Estado para modal de confirmación de borrado de lista
-  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
-  const [listToDelete, setListToDelete] = React.useState<{id: string, name: string} | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false)
+  const [listToDelete, setListToDelete] = React.useState<{ id: string; name: string } | null>(null)
+  const [accountSettingsOpen, setAccountSettingsOpen] = React.useState(false)
+  const [deleteAccountModalOpen, setDeleteAccountModalOpen] = React.useState(false)
+  const [deleteAccountError, setDeleteAccountError] = React.useState<string | null>(null)
+  const [isDeletingAccount, setIsDeletingAccount] = React.useState(false)
   const theme = useTheme()
   const location = useLocation()
   const [open, setOpen] = React.useState(false)
   const [isClosing, setIsClosing] = React.useState(false)
-  const { logout } = useAuth()
+  const { logout, name } = useAuth()
   const { title, setTitle } = useTitle()
-  const {lists, createList, deleteList, fetchLists} = useTaskContext()
+  const { lists, createList, deleteList, fetchLists } = useTaskContext()
   const navigate = useNavigate()
-  const [isOverItem, setIsOverItem] = React.useState<string|null>()
+  const [isOverItem, setIsOverItem] = React.useState<string | null>(null)
 
   const handleAddList = async () => {
     try {
@@ -133,9 +139,34 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
   }
 
   const handleLogout = async () => {
-  await logout(); 
-  navigate("/");
-};
+    await logout()
+    navigate("/")
+  }
+
+  const handleAccountSettingsOpen = () => setAccountSettingsOpen(true)
+
+  const handleAccountSettingsClose = () => {
+    if (isDeletingAccount) return
+    setAccountSettingsOpen(false)
+    setDeleteAccountModalOpen(false)
+    setDeleteAccountError(null)
+  }
+
+  const handleDeleteAccountRequest = async () => {
+    setIsDeletingAccount(true)
+    setDeleteAccountError(null)
+    try {
+      await accountService.deleteAccount()
+      await logout()
+      navigate("/")
+      setAccountSettingsOpen(false)
+    } catch (error) {
+      setDeleteAccountError("No pudimos borrar tu cuenta. Intenta nuevamente.")
+    } finally {
+      setIsDeletingAccount(false)
+      setDeleteAccountModalOpen(false)
+    }
+  }
 
   const menuItems = [
     { text: "My Day", path: "/home/my-day", icon: <TodayIcon /> },
@@ -181,6 +212,12 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
           <Typography variant="h5" noWrap component="div" sx={{ flexGrow: 1, textAlign: "start" }}>
             {title}
           </Typography>
+          <IconButton color="inherit" onClick={handleAccountSettingsOpen} sx={{ mr: 1 }}>
+            <SettingsOutlinedIcon />
+            <Typography variant="body2" sx={{ ml: 1, display: { xs: "none", sm: "block" } }}>
+              Account
+            </Typography>
+          </IconButton>
           <IconButton color="inherit" onClick={handleLogout} edge="end">
             <LogoutIcon />
             <Typography variant="body2" sx={{ ml: 1, display: { xs: "none", sm: "block" } }}>
@@ -462,6 +499,42 @@ export default function ResponsiveSidebar({ children }: ResponsiveSidebarProps) 
         <DrawerHeader />
         {children}
       </Main>
+      <Dialog open={accountSettingsOpen} onClose={handleAccountSettingsClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Account settings</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body1" mb={1}>
+            Manage your account.
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            You can request to delete your account. This will remove all your lists and tasks.
+          </Typography>
+          {deleteAccountError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteAccountError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleAccountSettingsClose} disabled={isDeletingAccount}>
+            Close
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => setDeleteAccountModalOpen(true)}
+            disabled={isDeletingAccount}
+          >
+            Delete account
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <DeleteItemModal
+        open={deleteAccountModalOpen}
+        onClose={() => setDeleteAccountModalOpen(false)}
+        onConfirm={handleDeleteAccountRequest}
+        type="account"
+        name={name || ""}
+      />
     </Box>
   )
 }
