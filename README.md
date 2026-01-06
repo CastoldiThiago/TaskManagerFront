@@ -1,34 +1,36 @@
-# Task Manager Frontend
+# Task Manager Front
 
 A modern task management application built with React and TypeScript.
 
 ## Features
 
 - Task creation, editing, and deletion
-- User authentication and authorization
+- Task status management
+- User authentication
 - Responsive design
-- Real-time updates
+- Modern UI with Tailwind CSS
 
-## Authentication
+## Authentication and Security
 
-The application supports user authentication with email and password. 
+The application includes JWT-based authentication with secure token management:
 
-**Note:** The codebase includes integration with `@react-oauth/google` for Google login functionality. However, this feature is currently disabled due to cost considerations. The implementation remains in the code for potential future activation.
+- **Standard Authentication**: Email and password login with JWT tokens
+- **Google OAuth Implementation**: Google login functionality has been fully implemented in the codebase but is currently disabled in production due to API cost considerations. The feature can be easily enabled by configuring the appropriate Google OAuth credentials and environment variables when ready for deployment.
 
 ## Technologies Used
 
-- React
+- React 18
 - TypeScript
-- Vite
+- Tailwind CSS
 - React Router
 - Axios for API calls
-- @react-oauth/google (integration present but disabled)
+- Vite as build tool
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v16 or higher)
 - npm or yarn
 
 ### Installation
@@ -54,12 +56,14 @@ VITE_API_URL=your_api_url_here
 npm run dev
 ```
 
+5. Open your browser and navigate to `http://localhost:5173`
+
 ## Available Scripts
 
-- `npm run dev` - Starts the development server
-- `npm run build` - Builds the app for production
-- `npm run preview` - Preview the production build locally
-- `npm run lint` - Run ESLint to check code quality
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
 
 ## Project Structure
 
@@ -67,16 +71,26 @@ npm run dev
 src/
 ├── components/     # Reusable UI components
 ├── pages/         # Page components
-├── services/      # API service functions
-├── types/         # TypeScript type definitions
+├── services/      # API services
 ├── utils/         # Utility functions
+├── types/         # TypeScript type definitions
 └── App.tsx        # Main application component
 ```
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
 This project is licensed under the MIT License.
+
+## Contact
+
+Thiago Castoldi - [@CastoldiThiago](https://github.com/CastoldiThiago)
+
+Project Link: [https://github.com/CastoldiThiago/TaskManagerFront](https://github.com/CastoldiThiago/TaskManagerFront)
